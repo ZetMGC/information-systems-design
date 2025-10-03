@@ -39,6 +39,18 @@ class Teacher {
   static bool isValidPhone(String s) => _phoneRe.hasMatch(s.trim());
   static bool isValidExperience(int years) => years >= 0 && years <= 80;
 
+  /// Проверяет условие [cond], если не выполняется, кидает [ArgumentError] с сообщением [message].
+  static void _require(bool cond, String message) {
+    if (!cond) throw ArgumentError(message);
+  }
+
+  /// Валидирует поле имени [value] с меткой [label]. Если [optional] и значение пустое, не валидирует.
+  static void _validateNameField(String? value, String label, {bool optional = false}) {
+    if (optional && (value == null || value.isEmpty)) return;
+    _require(value != null && isValidName(value), 'Некорректное значение поля $label');
+  }
+
+  /// Валидирует все поля преподавателя.
   static void validateAll({
     required String lastName,
     required String firstName,
@@ -46,22 +58,16 @@ class Teacher {
     required String phone,
     required int experienceYears,
   }) {
-    if (!isValidName(lastName)) {
-      throw ArgumentError('Некорректная фамилия');
-    }
-    if (!isValidName(firstName)) {
-      throw ArgumentError('Некорректное имя');
-    }
-    if (middleName != null && middleName.isNotEmpty && !isValidName(middleName)) {
-      throw ArgumentError('Некорректное отчество');
-    }
-    if (!isValidPhone(phone)) {
-      throw ArgumentError('Некорректный телефон (ожидается +XXXXXXXXXXX, 10–15 цифр)');
-    }
-    if (!isValidExperience(experienceYears)) {
-      throw ArgumentError('Некорректный стаж (0..80 лет)');
-    }
+    _validateNameField(lastName, 'Фамилия');
+    _validateNameField(firstName, 'Имя');
+    _validateNameField(middleName, 'Отчество', optional: true);
+    _require(isValidPhone(phone), 'Некорректный телефон');
+    _require(isValidExperience(experienceYears), 'Некорректный стаж');
   }
+
+  // --- нормализаця ввода ---
+  static String _norm(String s) => s.trim();
+  static String? _normOpt(String? s) => (s == null || s.trim().isEmpty) ? null : s.trim();
 
   // --- factory ---
   /// Фабрика создания преподавателя с валидацией.
@@ -72,20 +78,25 @@ class Teacher {
     required String phone,
     required int experienceYears,
   }) {
+    final ln = _norm(lastName);
+    final fn = _norm(firstName);
+    final mn = _normOpt(middleName);
+    final ph = _norm(phone);
+
     validateAll(
-      lastName: lastName,
-      firstName: firstName,
-      middleName: middleName,
-      phone: phone,
+      lastName: ln,
+      firstName: fn,
+      middleName: mn,
+      phone: ph,
       experienceYears: experienceYears,
     );
 
     return Teacher._(
       id: null,
-      lastName: lastName.trim(),
-      firstName: firstName.trim(),
-      middleName: middleName?.trim(),
-      phone: phone.trim(),
+      lastName: ln,
+      firstName: fn,
+      middleName: mn,
+      phone: ph,
       experienceYears: experienceYears,
     );
   }
@@ -103,21 +114,25 @@ class Teacher {
       throw ArgumentError('id должен быть положительным');
     }
 
-    validateAll(
+    final t = Teacher.create(
       lastName: lastName,
       firstName: firstName,
       middleName: middleName,
       phone: phone,
       experienceYears: experienceYears,
     );
+    return t.copyWithId(id);
+  }
 
+  Teacher copyWithId(int id) {
+    if (id <= 0) throw ArgumentError('id должен быть положительным');
     return Teacher._(
       id: id,
-      lastName: lastName.trim(),
-      firstName: firstName.trim(),
-      middleName: (middleName == null || middleName.trim().isEmpty) ? null : middleName.trim(),
-      phone: phone.trim(),
-      experienceYears: experienceYears,
+      lastName: _lastName,
+      firstName: _firstName,
+      middleName: _middleName,
+      phone: _phone,
+      experienceYears: _experienceYears,
     );
   }
 }
