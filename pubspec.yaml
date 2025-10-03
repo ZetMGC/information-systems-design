@@ -1,0 +1,15 @@
+name: information_systems_design
+description: " "
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'  
+
+dependencies:
+  test: ^1.25.0
+
+dev_dependencies:
+  test: ^1.25.0
+
+executables:
+  smoke: bin/smoke_teacher.dart
