@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+
 /// Доменная модель преподавателя. </br>
 class Teacher {
   // --- private fields ---
