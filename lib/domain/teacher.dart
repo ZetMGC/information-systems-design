@@ -5,7 +5,6 @@ class Teacher extends TeacherInfo {
   // --- private fields ---
   final int _experienceYears;
   
-
   // --- base constructor ---
   const Teacher._({
     required int? id,
@@ -28,11 +27,6 @@ class Teacher extends TeacherInfo {
 
   static bool isValidExperience(int years) => years >= 0 && years <= 80;
 
-  /// Проверяет условие [cond], если не выполняется, кидает [ArgumentError] с сообщением [message].
-  static void _require(bool cond, String message) {
-    if (!cond) throw ArgumentError(message);
-  }
-
   /// Валидирует все поля преподавателя.
   static void validateAll({
     required String lastName,
@@ -44,13 +38,9 @@ class Teacher extends TeacherInfo {
     TeacherInfo.validateNameField(lastName, 'Фамилия');
     TeacherInfo.validateNameField(firstName, 'Имя');
     TeacherInfo.validateNameField(middleName, 'Отчество', optional: true);
-    _require(TeacherInfo.isValidPhone(phone), 'Некорректный телефон');
-    _require(isValidExperience(experienceYears), 'Некорректный стаж');
+    TeacherInfo.require(TeacherInfo.isValidPhone(phone), 'Некорректный телефон');
+    TeacherInfo.require(isValidExperience(experienceYears), 'Некорректный стаж');
   }
-
-  // --- нормализаця ввода ---
-  static String _norm(String s) => s.trim();
-  static String? _normOpt(String? s) => (s == null || s.trim().isEmpty) ? null : s.trim();
 
   // --- factory ---
   /// Универсальная фабрика: принимает разные источники и создаёт Teacher.
@@ -141,10 +131,10 @@ class Teacher extends TeacherInfo {
     required String phone,
     required int experienceYears,
   }) {
-    final ln = _norm(lastName);
-    final fn = _norm(firstName);
-    final mn = _normOpt(middleName);
-    final ph = _norm(phone);
+    final ln = TeacherInfo.norm(lastName);
+    final fn = TeacherInfo.norm(firstName);
+    final mn = TeacherInfo.normOpt(middleName);
+    final ph = TeacherInfo.norm(phone);
 
     validateAll(
       lastName: ln,
@@ -339,32 +329,17 @@ class Teacher extends TeacherInfo {
   // --- Вывод ---
   /// Текстовое представление класса.
   @override
-  String toString() {
-    final buf = StringBuffer()
-      ..write('Teacher(')
-      ..write('id: ${_id ?? "null"}, ')
-      ..write('lastName: $_lastName, ')
-      ..write('firstName: $_firstName, ')
-      ..write('middleName: ${_middleName ?? "null"}, ')
-      ..write('phone: $_phone, ')
-      ..write('experienceYears: $_experienceYears')
-      ..write(')');
-    return buf.toString();
-  }
+  String toString() => 'Teacher(${toShortString()}, experienceYears: $_experienceYears)';
 
   /// Перегрузка оператора равенства для сравнения объектов.
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is Teacher &&
-      other._id == _id &&
-      other._lastName == _lastName &&
-      other._firstName == _firstName &&
-      other._middleName == _middleName &&
-      other._phone == _phone &&
-      other._experienceYears == _experienceYears;
+          super == other &&
+          other._experienceYears == _experienceYears;
   }
 
   @override
-  int get hashCode => Object.hash(_id, _lastName, _firstName, _middleName, _phone, _experienceYears);
+  int get hashCode => Object.hash(super.hashCode, _experienceYears);
 }

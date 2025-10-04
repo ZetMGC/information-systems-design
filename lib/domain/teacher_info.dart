@@ -42,6 +42,7 @@ class TeacherInfo {
   static bool isValidName(String s)   => s.trim().isNotEmpty && nameRe.hasMatch(s.trim());
   static bool isValidPhone(String s)  => phoneRe.hasMatch(s.trim());
 
+  /// Проверяет условие [cond], если не выполняется, кидает [ArgumentError] с сообщением [message].
   static void require(bool cond, String message) {
     if (!cond) throw ArgumentError(message);
   }
