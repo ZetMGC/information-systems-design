@@ -116,29 +116,36 @@ class Teacher {
         return _fromList(it.toList());
 
       case ({
-        int? id,
+        int id,
         String lastName,
         String firstName,
         String? middleName,
         String phone,
         int experienceYears,
-      }) rec:
-        return (rec.id == null)
-            ? Teacher.create(
-                lastName: rec.lastName,
-                firstName: rec.firstName,
-                middleName: rec.middleName,
-                phone: rec.phone,
-                experienceYears: rec.experienceYears,
-              )
-            : Teacher.withId(
-                id: rec.id!,
-                lastName: rec.lastName,
-                firstName: rec.firstName,
-                middleName: rec.middleName,
-                phone: rec.phone,
-                experienceYears: rec.experienceYears,
-              );
+      }) recWithId:
+        return Teacher.withId(
+          id: recWithId.id,
+          lastName: recWithId.lastName,
+          firstName: recWithId.firstName,
+          middleName: recWithId.middleName,
+          phone: recWithId.phone,
+          experienceYears: recWithId.experienceYears,
+        );
+
+      case ({
+        String lastName,
+        String firstName,
+        String? middleName,
+        String phone,
+        int experienceYears,
+      }) recNoId:
+        return Teacher.create(
+          lastName: recNoId.lastName,
+          firstName: recNoId.firstName,
+          middleName: recNoId.middleName,
+          phone: recNoId.phone,
+          experienceYears: recNoId.experienceYears,
+        );
 
       default:
         throw ArgumentError('неизвестный тип source: ${source.runtimeType}');
@@ -261,7 +268,7 @@ class Teacher {
   }
 
   factory Teacher.fromJson(Map<String, dynamic> json) {
-    T _read<T>(List<String> keys, {T? defaultValue, bool required = false}) {
+    T? _read<T>(List<String> keys, {T? defaultValue, bool required = false}) {
       for (final k in keys) {
         if (json.containsKey(k) && json[k] != null) {
           final v = json[k];
@@ -275,15 +282,15 @@ class Teacher {
       if (required) {
         throw FormatException('Отсутствует обязательное поле: ${keys.join("|")}');
       }
-      return defaultValue as T;
+      return defaultValue;
     }
 
     final int? id = _read<int>(['id', 'teacherId']);
-    final String lastName = _read<String>(['lastName', 'last_name'], required: true);
-    final String firstName = _read<String>(['firstName', 'first_name'], required: true);
+    final String lastName = _read<String>(['lastName', 'last_name'], required: true)!;
+    final String firstName = _read<String>(['firstName', 'first_name'], required: true)!;
     final String? middleName = _read<String?>(['middleName', 'middle_name'], defaultValue: null);
-    final String phone = _read<String>(['phone', 'phoneNumber', 'phone_number'], required: true);
-    final int experienceYears = _read<int>(['experienceYears', 'experience_years'], required: true);
+    final String phone = _read<String>(['phone', 'phoneNumber', 'phone_number'], required: true)!;
+    final int experienceYears = _read<int>(['experienceYears', 'experience_years'], required: true)!;
 
     return (id == null)
         ? Teacher.create(
@@ -347,4 +354,45 @@ class Teacher {
       throw FormatException('Ожидалось 5 или 6 элементов, получено: ${list.length}');
     }
   }
+
+  // --- Вывод ---
+  /// Текстовое представление класса.
+  @override
+  String toString() {
+    final buf = StringBuffer()
+      ..write('Teacher(')
+      ..write('id: ${_id ?? "null"}, ')
+      ..write('lastName: $_lastName, ')
+      ..write('firstName: $_firstName, ')
+      ..write('middleName: ${_middleName ?? "null"}, ')
+      ..write('phone: $_phone, ')
+      ..write('experienceYears: $_experienceYears')
+      ..write(')');
+    return buf.toString();
+  }
+
+  /// Краткое строковое представление: "Фамилия И.О. (стаж лет)".
+  String toShortString() {
+    final initials = [_firstName.isNotEmpty ? '${_firstName[0]}.' : '', (middleName != null && middleName!.isNotEmpty) ? '${middleName![0]}.' : '']
+        .join();
+      
+    return '$_lastName $initials (${_experienceYears} лет стаж)';
+  }
+
+
+  /// Перегрузка оператора равенства для сравнения объектов.
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Teacher &&
+      other._id == _id &&
+      other._lastName == _lastName &&
+      other._firstName == _firstName &&
+      other._middleName == _middleName &&
+      other._phone == _phone &&
+      other._experienceYears == _experienceYears;
+  }
+
+  @override
+  int get hashCode => Object.hash(_id, _lastName, _firstName, _middleName, _phone, _experienceYears);
 }
