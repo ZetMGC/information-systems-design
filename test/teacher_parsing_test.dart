@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:information_systems_design/domain/teacher.dart';
+import 'package:information_systems_design/domain/teacher_lib.dart';
 
 void main() {
   group('Teacher.fromString', () {
@@ -73,7 +73,6 @@ void main() {
     test('отсутствует обязательное поле -> FormatException', () {
       expect(
         () => Teacher.from({
-          // 'lastName' отсутствует
           'firstName': 'Иван',
           'phone': '+79990001122',
           'experienceYears': 1,

@@ -1,3 +1,5 @@
+part of teacher_lib;
+
 class TeacherInfo {
   // ---- краткие поля ----
   final int? _id;                
@@ -44,9 +46,10 @@ class TeacherInfo {
     if (!cond) throw ArgumentError(message);
   }
 
+  /// Валидирует поле имени [value] с меткой [label]. Если [optional] и значение пустое, не валидирует.
   static void validateNameField(String? value, String label, {bool optional = false}) {
     if (optional && (value == null || value.isEmpty)) return;
-    require(value != null && isValidName(value), 'Некорректное поле: $label');
+    require(value != null && isValidName(value), 'Некорректное значение поля $label');
   }
 
   // ---- краткий вывод ----

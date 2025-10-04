@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:information_systems_design/domain/teacher.dart';
+import 'package:information_systems_design/domain/teacher_lib.dart';
 
 void main() {
   test('toString полное представление', () {
@@ -25,7 +25,7 @@ void main() {
         experienceYears: 7,
       )
     );
-    expect(t.toShortString(), 'Петров П.С. (7 лет стаж)');
+    expect(t.toShortString(), 'Петров П.С., +79993334455');
   });
 
   test('сравнение объектов == и hashCode', () {

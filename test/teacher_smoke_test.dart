@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:information_systems_design/domain/teacher.dart';
+import 'package:information_systems_design/domain/teacher_lib.dart';
 
 void main() {
   test('Teacher.create — телефон валидный', () {

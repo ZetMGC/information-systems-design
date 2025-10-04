@@ -1,15 +1,10 @@
-import 'dart:convert';
-
+part of teacher_lib;
 
 /// Доменная модель преподавателя. </br>
-class Teacher {
+class Teacher extends TeacherInfo {
   // --- private fields ---
-  final int? _id;                 
-  final String _lastName;
-  final String _firstName;
-  final String? _middleName;      
-  final String _phone;
   final int _experienceYears;
+  
 
   // --- base constructor ---
   const Teacher._({
@@ -19,38 +14,23 @@ class Teacher {
     String? middleName,
     required String phone,
     required int experienceYears,
-  })  : _id = id,
-        _lastName = lastName,
-        _firstName = firstName,
-        _middleName = middleName,
-        _phone = phone,
-        _experienceYears = experienceYears;
+  })  : _experienceYears = experienceYears,
+        super._(
+          id: id,
+          lastName: lastName,
+          firstName: firstName,
+          middleName: middleName,
+          phone: phone,
+        );
 
   // --- getter ---
-  int? get id => _id;
-  String get lastName => _lastName;
-  String get firstName => _firstName;
-  String? get middleName => _middleName;
-  String get phone => _phone;
   int get experienceYears => _experienceYears;
 
-  // --- Static validation ---
-  static final RegExp _nameRe = RegExp(r"^[A-Za-zА-Яа-яЁё\-'\s]{1,100}$");
-  static final RegExp _phoneRe = RegExp(r'^\+?[0-9]{10,15}$');
-
-  static bool isValidName(String s) => s.trim().isNotEmpty && _nameRe.hasMatch(s.trim());
-  static bool isValidPhone(String s) => _phoneRe.hasMatch(s.trim());
   static bool isValidExperience(int years) => years >= 0 && years <= 80;
 
   /// Проверяет условие [cond], если не выполняется, кидает [ArgumentError] с сообщением [message].
   static void _require(bool cond, String message) {
     if (!cond) throw ArgumentError(message);
-  }
-
-  /// Валидирует поле имени [value] с меткой [label]. Если [optional] и значение пустое, не валидирует.
-  static void _validateNameField(String? value, String label, {bool optional = false}) {
-    if (optional && (value == null || value.isEmpty)) return;
-    _require(value != null && isValidName(value), 'Некорректное значение поля $label');
   }
 
   /// Валидирует все поля преподавателя.
@@ -61,10 +41,10 @@ class Teacher {
     required String phone,
     required int experienceYears,
   }) {
-    _validateNameField(lastName, 'Фамилия');
-    _validateNameField(firstName, 'Имя');
-    _validateNameField(middleName, 'Отчество', optional: true);
-    _require(isValidPhone(phone), 'Некорректный телефон');
+    TeacherInfo.validateNameField(lastName, 'Фамилия');
+    TeacherInfo.validateNameField(firstName, 'Имя');
+    TeacherInfo.validateNameField(middleName, 'Отчество', optional: true);
+    _require(TeacherInfo.isValidPhone(phone), 'Некорректный телефон');
     _require(isValidExperience(experienceYears), 'Некорректный стаж');
   }
 
@@ -371,15 +351,6 @@ class Teacher {
       ..write(')');
     return buf.toString();
   }
-
-  /// Краткое строковое представление: "Фамилия И.О. (стаж лет)".
-  String toShortString() {
-    final initials = [_firstName.isNotEmpty ? '${_firstName[0]}.' : '', (middleName != null && middleName!.isNotEmpty) ? '${middleName![0]}.' : '']
-        .join();
-      
-    return '$_lastName $initials (${_experienceYears} лет стаж)';
-  }
-
 
   /// Перегрузка оператора равенства для сравнения объектов.
   @override
