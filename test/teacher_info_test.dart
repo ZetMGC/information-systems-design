@@ -83,8 +83,6 @@ void main() {
         experienceYears: 10,
       );
 
-      expect(t is TeacherInfo, isTrue);
-
       expect(t.toShortString(), 'Кузнецов К., +77071112233');
 
       final TeacherInfo baseRef = t;
