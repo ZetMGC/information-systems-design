@@ -3,7 +3,7 @@
 ``` mermaid
 erDiagram
     TEACHER ||--o{ ASSIGNMENT : "</br>"
-    GROUP   ||--o{ ASSIGNMENT : "</br>"
+    GROUP   ||--o{ ASSIGNMENT : "</br>";
     SUBJECT ||--o{ ASSIGNMENT : "</br>"
     GROUP   ||--o{ STUDENT    : "</br>"
 

@@ -154,7 +154,7 @@ class Teacher extends TeacherInfo {
     );
   }
 
-  /// Фабрика создания преподавателя с валидацией и указанием id (может быть из БД).
+  /// Фабрика создания преподавателя с валидацией и указанием [id] (может быть из БД).
   factory Teacher.withId({
     required int id,
     required String lastName,
@@ -164,7 +164,7 @@ class Teacher extends TeacherInfo {
     required int experienceYears,
   }) {
     if (id <= 0) {
-      throw ArgumentError('id должен быть положительным');
+      throw ArgumentError('id must be > 0');
     }
 
     final t = Teacher.create(
@@ -330,6 +330,13 @@ class Teacher extends TeacherInfo {
   /// Текстовое представление класса.
   @override
   String toString() => 'Teacher(${toShortString()}, experienceYears: $_experienceYears)';
+
+	@override
+  Map<String, dynamic> toJson() {
+    final short_info = super.toJson();
+		short_info['experience_years'] = experienceYears;
+		return short_info;
+  }
 
   /// Перегрузка оператора равенства для сравнения объектов.
   @override

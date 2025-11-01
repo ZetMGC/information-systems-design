@@ -32,6 +32,16 @@ class TeacherInfo {
   static final RegExp nameRe  = RegExp(r"^[A-Za-zА-Яа-яЁё\-'\s]{1,100}$");
   static final RegExp phoneRe = RegExp(r'^\+?[0-9]{10,15}$');
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'last_name': lastName,
+      'first_name': firstName,
+      'middle_name': middleName,
+      'phone': phone
+    };
+  }
+
   static String norm(String s) => s.trim();
   static String? normOpt(String? s) {
     if (s == null) return null;
@@ -100,6 +110,33 @@ class TeacherInfo {
       middleName: mn,
       phone: ph,
     );
+  }
+
+  factory TeacherInfo.fromJson(Map<String, dynamic> json) {
+    T? _read<T>(List<String> keys, {T? defaultValue, bool required = false}) {
+      for (final k in keys) {
+        if (json.containsKey(k) && json[k] != null) {
+          final v = json[k];
+          if (v is T) return v;
+          if (T == int && v is String) {
+            final parsed = int.tryParse(v);
+            if (parsed != null) return parsed as T;
+          }
+        }
+      }
+      if (required) {
+        throw FormatException('Отсутствует обязательное поле: ${keys.join("|")}');
+      }
+      return defaultValue;
+    }
+
+    final int? id = _read<int>(['id', 'teacherId']);
+    final String lastName = _read<String>(['lastName', 'last_name'], required: true)!;
+    final String firstName = _read<String>(['firstName', 'first_name'], required: true)!;
+    final String? middleName = _read<String?>(['middleName', 'middle_name'], defaultValue: null);
+    final String phone = _read<String>(['phone', 'phoneNumber', 'phone_number'], required: true)!;
+
+    return TeacherInfo._(id: id, lastName: lastName, firstName: firstName, middleName: middleName, phone: phone);
   }
 
   @override
