@@ -7,6 +7,7 @@
       "name": "information_systems_design",
       "version": "0.1.0",
       "dependencies": [
+        "json2yaml",
         "test"
       ],
       "devDependencies": [
@@ -43,6 +44,13 @@
         "web_socket_channel",
         "webkit_inspection_protocol",
         "yaml"
+      ]
+    },
+    {
+      "name": "json2yaml",
+      "version": "3.0.1",
+      "dependencies": [
+        "meta"
       ]
     },
     {
@@ -299,6 +307,11 @@
       ]
     },
     {
+      "name": "meta",
+      "version": "1.17.0",
+      "dependencies": []
+    },
+    {
       "name": "string_scanner",
       "version": "1.4.1",
       "dependencies": [
@@ -349,11 +362,6 @@
         "source_maps",
         "stack_trace"
       ]
-    },
-    {
-      "name": "meta",
-      "version": "1.17.0",
-      "dependencies": []
     },
     {
       "name": "glob",

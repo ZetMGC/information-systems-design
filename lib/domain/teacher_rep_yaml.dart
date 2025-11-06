@@ -1,38 +1,52 @@
 part of teacher_lib;
 
-class TeacherRepJson {
+class TeacherRepYaml {
   final String path;
-  TeacherRepJson(this.path);
+
+  TeacherRepYaml(this.path);
+
+  dynamic _toDart(dynamic v) => jsonEncode(v);
 
   Future<List<Teacher>> readAll() async {
     final file = File(path);
     if (!await file.exists()) return <Teacher>[];
-    
+
     final text = await file.readAsString();
     if (text.trim().isEmpty) return <Teacher>[];
 
-    final dynamic raw = jsonDecode(text);
-    if(raw is! List) {
-      throw const FormatException('JSON root must be a List!'); 
+    final root = loadYaml(text);
+    if (root is! YamlList) {
+      throw const FormatException('YAML root must be a List!');
     }
 
-    final list = (raw as List).asMap().entries.map((entry) {
-      final i = entry.key;
-      final e = entry.value;
-      try {
-        return Teacher.from(e);
-      } catch (err) {
-        throw FormatException('Bad item #$i in $path: $err');
-      }
-      }).toList();
+    final list = _toDart(root);
+    if (list is! List) {
+      throw const FormatException('YAML list conversion failed!');
+    }
 
-    return list;
+    final teachers = <Teacher>[];
+    for (var i = 0; i < list.length; i++) {
+      final t = list[i];
+      try {
+        teachers.add(t);
+      } catch (err) {
+        throw FormatException('Error processing item #$i in $path: $err');
+      }
+    }
+    return teachers;
   }
 
   Future<void> writeAll(List<Teacher> items) async {
-    final jsonText = jsonEncode(items.map((t) => t.toJson()).toList());
-    await File(path).parent.create(recursive: true);
-    await File(path).writeAsString(jsonText, flush: true);
+    final data = items.map((e) => e.toJson()).toList();
+    final yamlText = json2yaml(
+      <String, dynamic>{'teachers': data},
+      yamlStyle: YamlStyle.pubspecYaml, 
+    ); 
+
+    final file = File(path);
+    await file.parent.create(recursive: true);
+
+    await file.writeAsString(yamlText, flush: true);
   }
 
   Future<Teacher?> getById(int id) async {
