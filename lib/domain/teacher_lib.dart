@@ -9,3 +9,4 @@ part 'teacher_info.dart';
 part 'teacher.dart';
 part 'teacher_rep_json.dart';
 part 'teacher_rep_yaml.dart';
+part 'teacher_rep_base.dart';
