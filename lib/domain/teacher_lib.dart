@@ -1,12 +1,8 @@
 library teacher_lib;
 
-import 'dart:convert';
-import 'dart:io';
-import 'package:yaml/yaml.dart';
-import 'package:json2yaml/json2yaml.dart';
-
-part 'teacher_info.dart';
-part 'teacher.dart';
-part 'teacher_rep_json.dart';
-part 'teacher_rep_yaml.dart';
-part 'teacher_rep_base.dart';
+export 'teacher_info.dart';
+export 'teacher.dart';
+export 'teacher_rep_base.dart';
+export '../infrastructure/file/teacher_rep_json.dart';
+export '../infrastructure/file/teacher_rep_yaml.dart';
+export '../infrastructure/db/teacher_rep_db.dart';

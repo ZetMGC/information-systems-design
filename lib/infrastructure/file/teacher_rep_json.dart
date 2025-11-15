@@ -1,20 +1,25 @@
-part of teacher_lib;
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:information_systems_design/domain/teacher.dart';
+import 'package:information_systems_design/domain/teacher_rep_base.dart';
 
 class TeacherRepJson extends TeacherRepBase {
-  @override final String path;
+  @override
+  final String path;
   TeacherRepJson(this.path);
 
-  @override
+  @override 
   Future<List<Teacher>> readAll() async {
     final file = File(path);
     if (!await file.exists()) return <Teacher>[];
-    
+
     final text = await file.readAsString();
     if (text.trim().isEmpty) return <Teacher>[];
 
     final dynamic raw = jsonDecode(text);
-    if(raw is! List) {
-      throw const FormatException('JSON root must be a List!'); 
+    if (raw is! List) {
+      throw const FormatException('JSON root must be a List!');
     }
 
     final list = (raw as List).asMap().entries.map((entry) {
@@ -25,7 +30,7 @@ class TeacherRepJson extends TeacherRepBase {
       } catch (err) {
         throw FormatException('Bad item #$i in $path: $err');
       }
-      }).toList();
+    }).toList();
 
     return list;
   }
@@ -37,3 +42,4 @@ class TeacherRepJson extends TeacherRepBase {
     await File(path).writeAsString(jsonText, flush: true);
   }
 }
+

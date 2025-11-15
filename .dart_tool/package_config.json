@@ -32,6 +32,18 @@
       "languageVersion": "3.1"
     },
     {
+      "name": "buffer",
+      "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/buffer-1.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "charcode",
+      "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/charcode-1.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "cli_config",
       "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/cli_config-0.2.0",
       "packageUri": "lib/",
@@ -158,10 +170,28 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "postgres",
+      "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/postgres-2.6.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "pub_semver",
       "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/pub_semver-2.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "sasl_scram",
+      "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/sasl_scram-0.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "saslprep",
+      "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/saslprep-1.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "shelf",
@@ -254,6 +284,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "unorm_dart",
+      "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/unorm_dart-0.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "vm_service",
       "rootUri": "file:///C:/Users/leont/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-15.0.2",
       "packageUri": "lib/",
@@ -304,7 +340,7 @@
   ],
   "generator": "pub",
   "generatorVersion": "3.9.2",
-  "flutterRoot": "file:///E:/Prog/flutter",
+  "flutterRoot": "file:///D:/Shit/flutter",
   "flutterVersion": "3.35.3",
   "pubCache": "file:///C:/Users/leont/AppData/Local/Pub/Cache"
 }

@@ -1,4 +1,5 @@
-part of teacher_lib;
+import 'package:information_systems_design/domain/teacher.dart';
+import 'package:information_systems_design/domain/teacher_info.dart';
 
 abstract class TeacherRepBase {
   String get path;

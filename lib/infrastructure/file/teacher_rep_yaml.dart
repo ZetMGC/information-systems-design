@@ -1,7 +1,14 @@
-part of teacher_lib;
+import 'dart:io';
+
+import 'package:yaml/yaml.dart';
+import 'package:json2yaml/json2yaml.dart';
+
+import 'package:information_systems_design/domain/teacher.dart';
+import 'package:information_systems_design/domain/teacher_rep_base.dart';
 
 class TeacherRepYaml extends TeacherRepBase {
-  @override final String path;
+  @override
+  final String path;
 
   TeacherRepYaml(this.path);
 
@@ -14,7 +21,7 @@ class TeacherRepYaml extends TeacherRepBase {
 
     if (v is YamlList) {
       return v.map(_toDart).toList();
-    } 
+    }
     return v;
   }
 
@@ -26,7 +33,7 @@ class TeacherRepYaml extends TeacherRepBase {
     final text = await file.readAsString();
     if (text.trim().isEmpty) return const <Teacher>[];
 
-    final root = _toDart(loadYaml(text)); 
+    final root = _toDart(loadYaml(text));
 
     List<dynamic>? list;
     if (root is List) {
@@ -34,7 +41,7 @@ class TeacherRepYaml extends TeacherRepBase {
     } else if (root is Map) {
       if (root.containsKey('teachers')) {
         final t = root['teachers'];
-        if (t == null) return const <Teacher>[];          
+        if (t == null) return const <Teacher>[];
         if (t is List) {
           list = t;
         } else {
@@ -63,8 +70,8 @@ class TeacherRepYaml extends TeacherRepBase {
     final data = items.map((e) => e.toJson()).toList();
     final yamlText = json2yaml(
       <String, dynamic>{'teachers': data},
-      yamlStyle: YamlStyle.pubspecYaml, 
-    ); 
+      yamlStyle: YamlStyle.pubspecYaml,
+    );
 
     final file = File(path);
     await file.parent.create(recursive: true);
@@ -72,3 +79,4 @@ class TeacherRepYaml extends TeacherRepBase {
     await file.writeAsString(yamlText, flush: true);
   }
 }
+

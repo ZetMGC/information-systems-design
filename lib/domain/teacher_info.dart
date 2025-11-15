@@ -1,4 +1,4 @@
-part of teacher_lib;
+// domain model: TeacherInfo
 
 class TeacherInfo {
   // ---- краткие поля ----
@@ -8,7 +8,7 @@ class TeacherInfo {
   final String? _middleName;      
   final String _phone;
 
-  // ---- базовый конструктор ----
+  // ---- base constructor ----
   const TeacherInfo._({
     required int? id,
     required String lastName,
@@ -21,7 +21,16 @@ class TeacherInfo {
         _middleName = middleName,
         _phone = phone;
 
-  // ---- геттеры ----
+  // ---- public constructor ----
+  const TeacherInfo.internal({
+    required int? id,
+    required String lastName,
+    required String firstName,
+    String? middleName,
+    required String phone
+  }) : this._(id: id, lastName: lastName, firstName: firstName, middleName:middleName, phone : phone);
+
+  // ---- getters ----
   int? get id => _id;
   String get lastName => _lastName;
   String get firstName => _firstName;

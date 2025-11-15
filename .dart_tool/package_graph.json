@@ -8,6 +8,7 @@
       "version": "0.1.0",
       "dependencies": [
         "json2yaml",
+        "postgres",
         "test"
       ],
       "devDependencies": [
@@ -451,6 +452,54 @@
         "meta",
         "path"
       ]
+    },
+    {
+      "name": "postgres",
+      "version": "2.6.4",
+      "dependencies": [
+        "async",
+        "buffer",
+        "charcode",
+        "collection",
+        "crypto",
+        "meta",
+        "pool",
+        "sasl_scram",
+        "stack_trace",
+        "stream_channel"
+      ]
+    },
+    {
+      "name": "sasl_scram",
+      "version": "0.1.1",
+      "dependencies": [
+        "buffer",
+        "collection",
+        "crypto",
+        "saslprep"
+      ]
+    },
+    {
+      "name": "charcode",
+      "version": "1.4.0",
+      "dependencies": []
+    },
+    {
+      "name": "buffer",
+      "version": "1.2.3",
+      "dependencies": []
+    },
+    {
+      "name": "saslprep",
+      "version": "1.0.3",
+      "dependencies": [
+        "unorm_dart"
+      ]
+    },
+    {
+      "name": "unorm_dart",
+      "version": "0.3.2",
+      "dependencies": []
     }
   ],
   "configVersion": 1

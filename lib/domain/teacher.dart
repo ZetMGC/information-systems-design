@@ -1,4 +1,5 @@
-part of teacher_lib;
+import 'dart:convert';
+import 'package:information_systems_design/domain/teacher_info.dart';
 
 /// Доменная модель преподавателя. </br>
 class Teacher extends TeacherInfo {
@@ -14,7 +15,7 @@ class Teacher extends TeacherInfo {
     required String phone,
     required int experienceYears,
   })  : _experienceYears = experienceYears,
-        super._(
+        super.internal(
           id: id,
           lastName: lastName,
           firstName: firstName,
@@ -181,11 +182,11 @@ class Teacher extends TeacherInfo {
     if (id <= 0) throw ArgumentError('id должен быть положительным');
     return Teacher._(
       id: id,
-      lastName: _lastName,
-      firstName: _firstName,
-      middleName: _middleName,
-      phone: _phone,
-      experienceYears: _experienceYears,
+      lastName: lastName,
+      firstName: firstName,
+      middleName: middleName,
+      phone: phone,
+      experienceYears: experienceYears,
     );
   }
 
