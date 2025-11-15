@@ -1,25 +1,30 @@
 import 'package:test/test.dart';
-import 'package:postgres/postgres.dart';
 import 'package:information_systems_design/domain/teacher_lib.dart';
+import 'package:information_systems_design/infrastructure/db/app_db.dart';
 
 import 'dart:io';
 
 
 void main() {
-  late PostgreSQLConnection conn; 
+  final appDb = AppDb.I;
   late TeacherRepDb repo;
 
   final host = Platform.environment['PGHOST'] ?? '127.0.0.1';
   final port = int.parse(Platform.environment['PGPORT'] ?? '5432');
-  final db   = Platform.environment['PGDATABASE'] ?? 'postgres';
+  final dbName = Platform.environment['PGDATABASE'] ?? 'postgres';
   final user = Platform.environment['PGUSER'] ?? 'postgres';
-  final pass = Platform.environment['PGPASSWORD'] ?? 'secret';
+  final pass = Platform.environment['PGPASSWORD'] ?? 'postgres';
 
   setUpAll(() async {
-    conn = PostgreSQLConnection(host, port, db, username: user, password: pass);
-    await conn.open();
+    await appDb.open(
+      host: host,
+      port: port,
+      database: dbName,
+      user: user,
+      password: pass,
+    );
 
-    await conn.execute('''
+    await appDb.execute('''
       CREATE TABLE IF NOT EXISTS teachers (
         id               SERIAL PRIMARY KEY,
         last_name        TEXT      NOT NULL,
@@ -30,7 +35,7 @@ void main() {
       );
     ''');
 
-    await conn.execute(r'''
+    await appDb.execute(r'''
       DO $$
       BEGIN
         IF NOT EXISTS (
@@ -43,15 +48,15 @@ void main() {
       END $$;
     ''');
 
-    repo = TeacherRepDb(conn);
+    repo = TeacherRepDb(appDb);
   });
 
   setUp(() async {
-    await conn.execute('TRUNCATE TABLE teachers RESTART IDENTITY CASCADE;');
+    await appDb.execute('TRUNCATE TABLE teachers RESTART IDENTITY CASCADE;');
   });
 
   tearDownAll(() async {
-    await conn.close();
+    await appDb.close();
   });
 
   Future<int> _seed({ 
@@ -61,15 +66,16 @@ void main() {
     required String phone,
     required int exp,
   }) async {
-    final rows = await conn.query(
+    final rows = await appDb.query(
       '''
       INSERT INTO teachers (last_name, first_name, middle_name, phone, experience_years)
       VALUES (@ln, @fn, @mn, @ph, @exp)
       RETURNING id
       ''',
-      substitutionValues: {'ln': ln, 'fn': fn, 'mn': mn, 'ph': phone, 'exp': exp},
+      params: {'ln': ln, 'fn': fn, 'mn': mn, 'ph': phone, 'exp': exp},
     );
-    return rows.first.first as int;
+    final value = rows.first.first;
+    return value is int ? value : int.parse(value.toString());
   }
 
   group('TeacherRepDB', () {
@@ -224,7 +230,7 @@ void main() {
 
       expect(await repo.getCount(), 3);
 
-      await conn.execute('TRUNCATE TABLE teachers RESTART IDENTITY CASCADE;');
+      await appDb.execute('TRUNCATE TABLE teachers RESTART IDENTITY CASCADE;');
       expect(await repo.getCount(), 0);
     });
   });

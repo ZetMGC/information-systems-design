@@ -1,11 +1,12 @@
 import 'package:information_systems_design/domain/teacher.dart';
 import 'package:information_systems_design/domain/teacher_info.dart';
 import 'package:information_systems_design/domain/teacher_rep_base.dart';
+import 'package:information_systems_design/infrastructure/db/app_db.dart';
 import 'package:postgres/postgres.dart';
-import 'package:test/test.dart';
 
 class TeacherRepDb extends TeacherRepBase {
-  final PostgreSQLConnection db;
+  final AppDb db;
+  
   TeacherRepDb(this.db);  
 
   @override
@@ -30,7 +31,7 @@ class TeacherRepDb extends TeacherRepBase {
       LIMIT 1
     ''';
 
-    final rows = await db.mappedResultsQuery(sql, substitutionValues: {'id': id});
+    final rows = await db.mappedQuery(sql, params: {'id': id});
     if (rows.isEmpty) return null;
 
     final m = rows.first['teachers']!;
@@ -63,7 +64,7 @@ class TeacherRepDb extends TeacherRepBase {
       LIMIT @k OFFSET @offset 
     ''';
 
-    final rows = await db.mappedResultsQuery(sql, substitutionValues: {'k': k, 'offset': offset});
+    final rows = await db.mappedQuery(sql, params: {'k': k, 'offset': offset});
 
     return rows.map((r) {
       final m = r['teachers']!;
@@ -89,7 +90,7 @@ class TeacherRepDb extends TeacherRepBase {
       RETURNING id, last_name, first_name, middle_name, phone, experience_years
     ''';
 
-    final rows = await db.mappedResultsQuery(sql, substitutionValues: {
+    final rows = await db.mappedQuery(sql, params: {
       'ln': item.lastName,
       'fn': item.firstName,
       'mn': item.middleName,
@@ -119,7 +120,7 @@ class TeacherRepDb extends TeacherRepBase {
       WHERE id = @id
     ''';
 
-    final res = await db.execute(sql, substitutionValues: {
+    final res = await db.execute(sql, params: {
       'ln': item.lastName,
       'fn': item.firstName,
       'mn': item.middleName,
@@ -128,7 +129,7 @@ class TeacherRepDb extends TeacherRepBase {
       'id': id
     });
 
-    final check = await db.query('SELECT 1 FROM teachers WHERE id=@id', substitutionValues: {'id': id});
+    final check = await db.query('SELECT 1 FROM teachers WHERE id=@id', params: {'id': id});
     return check.isNotEmpty;
   }
 
@@ -142,7 +143,7 @@ class TeacherRepDb extends TeacherRepBase {
       RETURNING id
     ''';
 
-    final rows = await db.query(sql, substitutionValues: {
+    final rows = await db.query(sql, params: {
       'ln': item.lastName, 
       'fn': item.firstName, 
       'mn': item.middleName,
@@ -162,7 +163,7 @@ class TeacherRepDb extends TeacherRepBase {
       DELETE FROM teachers WHERE id=@id RETURNING id
     ''';
 
-    final rows = await db.query(sql, substitutionValues: {'id': id});
+    final rows = await db.query(sql, params: {'id': id});
     return rows.isNotEmpty;
   }
 

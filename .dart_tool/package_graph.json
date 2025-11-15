@@ -48,6 +48,22 @@
       ]
     },
     {
+      "name": "postgres",
+      "version": "2.6.4",
+      "dependencies": [
+        "async",
+        "buffer",
+        "charcode",
+        "collection",
+        "crypto",
+        "meta",
+        "pool",
+        "sasl_scram",
+        "stack_trace",
+        "stream_channel"
+      ]
+    },
+    {
       "name": "json2yaml",
       "version": "3.0.1",
       "dependencies": [
@@ -313,6 +329,33 @@
       "dependencies": []
     },
     {
+      "name": "charcode",
+      "version": "1.4.0",
+      "dependencies": []
+    },
+    {
+      "name": "sasl_scram",
+      "version": "0.1.1",
+      "dependencies": [
+        "buffer",
+        "collection",
+        "crypto",
+        "saslprep"
+      ]
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.6",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
+      "name": "buffer",
+      "version": "1.2.3",
+      "dependencies": []
+    },
+    {
       "name": "string_scanner",
       "version": "1.4.1",
       "dependencies": [
@@ -335,13 +378,6 @@
       "name": "web",
       "version": "1.1.1",
       "dependencies": []
-    },
-    {
-      "name": "crypto",
-      "version": "3.0.6",
-      "dependencies": [
-        "typed_data"
-      ]
     },
     {
       "name": "vm_service",
@@ -446,54 +482,18 @@
       ]
     },
     {
+      "name": "saslprep",
+      "version": "1.0.3",
+      "dependencies": [
+        "unorm_dart"
+      ]
+    },
+    {
       "name": "file",
       "version": "7.0.1",
       "dependencies": [
         "meta",
         "path"
-      ]
-    },
-    {
-      "name": "postgres",
-      "version": "2.6.4",
-      "dependencies": [
-        "async",
-        "buffer",
-        "charcode",
-        "collection",
-        "crypto",
-        "meta",
-        "pool",
-        "sasl_scram",
-        "stack_trace",
-        "stream_channel"
-      ]
-    },
-    {
-      "name": "sasl_scram",
-      "version": "0.1.1",
-      "dependencies": [
-        "buffer",
-        "collection",
-        "crypto",
-        "saslprep"
-      ]
-    },
-    {
-      "name": "charcode",
-      "version": "1.4.0",
-      "dependencies": []
-    },
-    {
-      "name": "buffer",
-      "version": "1.2.3",
-      "dependencies": []
-    },
-    {
-      "name": "saslprep",
-      "version": "1.0.3",
-      "dependencies": [
-        "unorm_dart"
       ]
     },
     {
