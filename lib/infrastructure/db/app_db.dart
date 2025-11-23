@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:postgres/postgres.dart';
+import 'package:information_systems_design/infrastructure/db/db_client.dart';
 
 class AppDb {
   // ---- Singleton ----
@@ -77,11 +78,11 @@ class AppDb {
     String sql, {Map<String, dynamic>? params}
   ) => conn.execute(sql, substitutionValues: params);
 
-  Future<T> transaction<T>(
-    Future<T> Function(PostgreSQLExecutionContext tx) fn
-  ) async {
-    final dynamic res = await conn.transaction((ctx) => fn(ctx));
-    return res as T;
+  Future<R> transaction<R>(Future<R> Function(DbTx tx) action) async {
+    final R res = await conn.transaction(
+      (PostgreSQLExecutionContext ctx) => action(_PgTx(ctx)),
+    );
+    return res;
   }
 
   Future<int> scalarInt(String sql, {Map<String, dynamic>? params}) async {
@@ -89,4 +90,18 @@ class AppDb {
     final v = r.first.first;
     return v is int ? v : int.parse(v.toString());
   }
+}
+
+class _PgTx implements DbTx {
+  final PostgreSQLExecutionContext _ctx;
+  _PgTx(this._ctx);
+
+  @override
+  Future<int> execute(String sql, {Map<String, dynamic>? params}) => _ctx.execute(sql, substitutionValues: params);
+
+  @override
+  Future<List<List>> query(String sql, {Map<String, dynamic>? params}) => _ctx.query(sql, substitutionValues: params);
+
+  @override
+  Future<List<Map<String, Map<String, dynamic>>>> mappedQuery(sql, {Map<String, dynamic>? params}) => _ctx.mappedResultsQuery(sql, substitutionValues: params);  
 }

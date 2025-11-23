@@ -2,10 +2,11 @@ import 'package:information_systems_design/domain/teacher.dart';
 import 'package:information_systems_design/domain/teacher_info.dart';
 import 'package:information_systems_design/domain/teacher_rep_base.dart';
 import 'package:information_systems_design/infrastructure/db/app_db.dart';
+import 'package:information_systems_design/infrastructure/db/db_client.dart';
 import 'package:postgres/postgres.dart';
 
 class TeacherRepDb extends TeacherRepBase {
-  final AppDb db;
+  final DbClient db;
   
   TeacherRepDb(this.db);  
 

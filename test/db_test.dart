@@ -1,21 +1,23 @@
+import 'dart:io';
 import 'package:test/test.dart';
+
 import 'package:information_systems_design/domain/teacher_lib.dart';
 import 'package:information_systems_design/infrastructure/db/app_db.dart';
-
-import 'dart:io';
-
+import 'package:information_systems_design/infrastructure/db/pg_db_client_adapter.dart';
 
 void main() {
-  final appDb = AppDb.I;
+  late AppDb appDb;
+  late PgDbClientAdapter dbClient;
   late TeacherRepDb repo;
 
-  final host = Platform.environment['PGHOST'] ?? '127.0.0.1';
-  final port = int.parse(Platform.environment['PGPORT'] ?? '5432');
+  final host   = Platform.environment['PGHOST'] ?? '127.0.0.1';
+  final port   = int.parse(Platform.environment['PGPORT'] ?? '5432');
   final dbName = Platform.environment['PGDATABASE'] ?? 'postgres';
-  final user = Platform.environment['PGUSER'] ?? 'postgres';
-  final pass = Platform.environment['PGPASSWORD'] ?? 'postgres';
+  final user   = Platform.environment['PGUSER'] ?? 'postgres';
+  final pass   = Platform.environment['PGPASSWORD'] ?? 'secret';
 
   setUpAll(() async {
+    appDb = AppDb.I;
     await appDb.open(
       host: host,
       port: port,
@@ -24,6 +26,7 @@ void main() {
       password: pass,
     );
 
+    // схема
     await appDb.execute('''
       CREATE TABLE IF NOT EXISTS teachers (
         id               SERIAL PRIMARY KEY,
@@ -35,20 +38,12 @@ void main() {
       );
     ''');
 
-    await appDb.execute(r'''
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM pg_indexes
-          WHERE schemaname = ANY(current_schemas(true))
-            AND indexname = 'ux_teachers_phone'
-        ) THEN
-          CREATE UNIQUE INDEX ux_teachers_phone ON teachers(phone);
-        END IF;
-      END $$;
+    await appDb.execute('''
+      CREATE UNIQUE INDEX IF NOT EXISTS ux_teachers_phone ON teachers(phone);
     ''');
 
-    repo = TeacherRepDb(appDb);
+    dbClient = PgDbClientAdapter(appDb);
+    repo = TeacherRepDb(dbClient);
   });
 
   setUp(() async {
@@ -59,7 +54,7 @@ void main() {
     await appDb.close();
   });
 
-  Future<int> _seed({ 
+  Future<int> _seed({
     required String ln,
     required String fn,
     String? mn,
@@ -74,8 +69,8 @@ void main() {
       ''',
       params: {'ln': ln, 'fn': fn, 'mn': mn, 'ph': phone, 'exp': exp},
     );
-    final value = rows.first.first;
-    return value is int ? value : int.parse(value.toString());
+    final v = rows.first.first;
+    return (v is int) ? v : int.parse(v.toString());
   }
 
   group('TeacherRepDB', () {
@@ -103,12 +98,10 @@ void main() {
     });
 
     test('(b) getKthNShortList: sorted by lastName/firstName/id with pagination', () async {
-      // Разброс по алфавиту и id
       await _seed(ln: 'Иванов', fn: 'Иван', mn: 'Иваныч', phone: '+79990000001', exp: 5);
-      await _seed(ln: 'Петров', fn: 'Пётр', phone: '+79990000002', exp: 3);              
-      await _seed(ln: 'Альтов', fn: 'Антон', phone: '+79990000003', exp: 2);             
+      await _seed(ln: 'Петров', fn: 'Пётр', phone: '+79990000002', exp: 3);
+      await _seed(ln: 'Альтов', fn: 'Антон', phone: '+79990000003', exp: 2);
 
-      // Ожидаемый алфавит: Альтов(3), Иванов(1), Петров(2)
       final p1 = await repo.getKthNShortList(k: 2, n: 1);
       expect(p1.length, 2);
       expect(p1[0].lastName, 'Альтов');
@@ -159,10 +152,10 @@ void main() {
         () => repo.add(Teacher.create(
           lastName: 'Другой',
           firstName: 'Чел',
-          phone: '+79990000010', 
+          phone: '+79990000010',
           experienceYears: 1,
         )),
-        throwsA(anything), 
+        throwsA(anything),
       );
     });
 
@@ -200,8 +193,13 @@ void main() {
       );
       expect(miss, isFalse);
 
-      expect(() => repo.replaceById(0, Teacher.create(lastName: 'A', firstName: 'a', phone: '+79990000023', experienceYears: 1)),
-          throwsArgumentError);
+      expect(
+        () => repo.replaceById(
+          0,
+          Teacher.create(lastName: 'A', firstName: 'a', phone: '+79990000023', experienceYears: 1),
+        ),
+        throwsArgumentError,
+      );
     });
 
     test('(e) deleteById: true if deleted, false if absent; invalid id throws', () async {
