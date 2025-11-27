@@ -4,6 +4,8 @@ import 'package:test/test.dart';
 import 'package:information_systems_design/domain/teacher_lib.dart';
 import 'package:information_systems_design/infrastructure/db/app_db.dart';
 import 'package:information_systems_design/infrastructure/db/pg_db_client_adapter.dart';
+import 'package:information_systems_design/infrastructure/db/query_spec.dart';
+import 'package:information_systems_design/infrastructure/db/teacher_rep_db_decor.dart';
 
 void main() {
   late AppDb appDb;
@@ -14,7 +16,7 @@ void main() {
   final port   = int.parse(Platform.environment['PGPORT'] ?? '5432');
   final dbName = Platform.environment['PGDATABASE'] ?? 'postgres';
   final user   = Platform.environment['PGUSER'] ?? 'postgres';
-  final pass   = Platform.environment['PGPASSWORD'] ?? 'secret';
+  final pass   = Platform.environment['PGPASSWORD'] ?? 'postgres';
 
   setUpAll(() async {
     appDb = AppDb.I;
@@ -230,6 +232,41 @@ void main() {
 
       await appDb.execute('TRUNCATE TABLE teachers RESTART IDENTITY CASCADE;');
       expect(await repo.getCount(), 0);
+    });
+  });
+
+  group('TeacherRepDbDecor', () {
+    test('(g) getKthNShortList uses filter and sort options', () async {
+      await _seed(ln: 'Smith', fn: 'Anna', phone: '+79990000050', exp: 2);
+      await _seed(ln: 'Brown', fn: 'Charlie', phone: '+79990000051', exp: 7);
+      await _seed(ln: 'Adams', fn: 'Bob', phone: '+79990000052', exp: 5);
+
+      final decor = TeacherRepDbDecor(
+        inner: repo,
+        db: dbClient,
+        filter: QueryFilter('experience_years >= @minExp', {'minExp': 5}),
+        sort: const QuerySort(SortField.first_name, asc: false),
+      );
+
+      final page = await decor.getKthNShortList(k: 5, n: 1);
+      expect(page.length, 2);
+      expect(page[0].firstName, 'Charlie');
+      expect(page[1].firstName, 'Bob');
+      expect(page.every((info) => info.phone != '+79990000050'), isTrue);
+    });
+
+    test('(h) getCount respects filter params', () async {
+      await _seed(ln: 'Zero', fn: 'One', phone: '+79990000060', exp: 1);
+      await _seed(ln: 'Hero', fn: 'Two', phone: '+79990000061', exp: 4);
+      await _seed(ln: 'Hero', fn: 'Three', phone: '+79990000062', exp: 6);
+
+      final decor = TeacherRepDbDecor(
+        inner: repo,
+        db: dbClient,
+        filter: QueryFilter('experience_years >= @minExp', {'minExp': 5}),
+      );
+
+      expect(await decor.getCount(), 1);
     });
   });
 }
