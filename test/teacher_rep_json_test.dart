@@ -49,11 +49,9 @@ void main() {
     }
 
     test('(a) readAll: no file -> [], empty file -> []', () async {
-      // файла нет
       final all = await repo.readAll();
       expect(all, isEmpty);
 
-      // пустой файл
       await File(path).parent.create(recursive: true);
       await File(path).writeAsString('', flush: true);
       final all2 = await repo.readAll();
@@ -145,7 +143,6 @@ void main() {
         t(1, 'Петров', 'Пётр'),
         t(2, 'Альтов', 'Антон'),
       ]);
-      // ожидаемый алфавит: Альтов(2), Иванов(3), Петров(1)
       final p1 = await repo.getKthNShortList(k: 2, n: 1);
       expect(p1.length, 2);
       expect(p1[0].lastName, 'Альтов');
@@ -175,15 +172,12 @@ void main() {
       expect(sorted.map((e) => e.lastName).toList(),
           ['Альтов', 'Иванов', 'Петров']);
 
-      // файл пока мб в исходном порядке
       final beforePersist = await repo.readAll();
-      // проверка, что persist действительно меняет файл на отсортированный
       await repo.sortByLastName(persist: true);
       final afterPersist = await repo.readAll();
       expect(afterPersist.map((e) => e.lastName).toList(),
           ['Альтов', 'Иванов', 'Петров']);
 
-      // проверка что количество не меняется
       expect(afterPersist.length, beforePersist.length);
     });
 
@@ -202,7 +196,6 @@ void main() {
       final all = await repo.readAll();
       expect(all.any((x) => x.id == 6), isTrue);
 
-      // вход с заданным id — ошибка
       expect(
         () => repo.add(Teacher.withId(
           id: 100,

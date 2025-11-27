@@ -274,16 +274,13 @@ void main() {
     });
 
     test('(i) getCount', () async {
-      // 3 записи
       await writeYamlTeachers(
           [row(1, 'A', 'a'), row(2, 'B', 'b'), row(3, 'C', 'c')]);
       expect(await repo.getCount(), 3);
 
-      // записан пустой список -> 0
       await writeYamlTeachers([]);
       expect(await repo.getCount(), 0);
 
-      // без изменений файла остаётся 0
       expect(await repo.getCount(), 0);
 
       await writeYamlList([]);

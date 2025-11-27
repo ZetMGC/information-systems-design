@@ -47,28 +47,28 @@ void main() {
             last: 'Ivanov',
             first: 'Sergey',
             middle: 'Petrovich',
-            phone: '+100',
+            phone: '+79933295460',
             exp: 2),
         _t(
             id: 2,
             last: 'Sidorov',
             first: 'Alex',
             middle: 'Ivanovich',
-            phone: '+101',
+            phone: '+79933295461',
             exp: 7),
         _t(
             id: 3,
             last: 'Petrov',
             first: 'Boris',
             middle: 'Alekseevich',
-            phone: '+102',
+            phone: '+79933295462',
             exp: 5),
         _t(
             id: 4,
             last: 'Orlov',
             first: 'Anton',
             middle: null,
-            phone: '+103',
+            phone: '+79933295463',
             exp: 10),
       ]);
     });
@@ -92,7 +92,7 @@ void main() {
     test('custom comparator and getCount reflect filter', () async {
       final decor = TeacherRepFileDecor(
         inner: base,
-        filter: (t) => t.phone != '+100',
+        filter: (t) => t.phone != '+79933295460',
         sort: (a, b) => b.experienceYears.compareTo(a.experienceYears),
       );
 
