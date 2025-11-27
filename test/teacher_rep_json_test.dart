@@ -1,7 +1,8 @@
-import 'dart:io';
 import 'dart:convert';
-import 'package:test/test.dart';
+import 'dart:io';
+
 import 'package:information_systems_design/domain/teacher_lib.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('TeacherRepJson', () {
@@ -22,7 +23,7 @@ void main() {
     });
 
     /// Утилита: перезаписывает файл «сырым» JSON (корень — массив).
-    Future<void> _writeRaw(List<dynamic> rows) async {
+    Future<void> writeRaw(List<dynamic> rows) async {
       final f = File(path);
       await f.parent.create(recursive: true);
       await f.writeAsString(jsonEncode(rows), flush: true);
@@ -66,8 +67,10 @@ void main() {
     });
 
     test('(a/b) readAll <-> writeAll round-trip', () async {
-      final rows = [t(1, 'Петров', 'Пётр', mn: 'Сергеевич', phone: '+79990001122', exp: 7)];
-      await _writeRaw(rows);
+      final rows = [
+        t(1, 'Петров', 'Пётр', mn: 'Сергеевич', phone: '+79990001122', exp: 7)
+      ];
+      await writeRaw(rows);
 
       final list = await repo.readAll();
       expect(list.length, 1);
@@ -103,7 +106,7 @@ void main() {
 
       final csvString = 'Ivanov;Ivan;;+79990000003;5';
 
-      await _writeRaw([mapWithStrings, jsonStringItem, csvString]);
+      await writeRaw([mapWithStrings, jsonStringItem, csvString]);
 
       final list = await repo.readAll();
       expect(list.length, 3);
@@ -125,7 +128,7 @@ void main() {
     });
 
     test('(c) getById: found / not found / bad id', () async {
-      await _writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b')]);
+      await writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b')]);
 
       expect(await repo.getById(2), isNotNull);
       expect((await repo.getById(2))!.lastName, 'B');
@@ -137,7 +140,7 @@ void main() {
     });
 
     test('(d) getKthNShortList: pagination + sort by lastName (ASC)', () async {
-      await _writeRaw([
+      await writeRaw([
         t(3, 'Иванов', 'Иван', mn: 'Иваныч'),
         t(1, 'Петров', 'Пётр'),
         t(2, 'Альтов', 'Антон'),
@@ -160,22 +163,25 @@ void main() {
       expect(() => repo.getKthNShortList(k: 1, n: 0), throwsArgumentError);
     });
 
-    test('(e) sortByLastName: returns sorted copy; persist=true writes file', () async {
-      await _writeRaw([
+    test('(e) sortByLastName: returns sorted copy; persist=true writes file',
+        () async {
+      await writeRaw([
         t(3, 'Иванов', 'Иван'),
         t(1, 'Петров', 'Пётр'),
         t(2, 'Альтов', 'Антон'),
       ]);
 
       final sorted = await repo.sortByLastName();
-      expect(sorted.map((e) => e.lastName).toList(), ['Альтов', 'Иванов', 'Петров']);
+      expect(sorted.map((e) => e.lastName).toList(),
+          ['Альтов', 'Иванов', 'Петров']);
 
       // файл пока мб в исходном порядке
       final beforePersist = await repo.readAll();
       // проверка, что persist действительно меняет файл на отсортированный
       await repo.sortByLastName(persist: true);
       final afterPersist = await repo.readAll();
-      expect(afterPersist.map((e) => e.lastName).toList(), ['Альтов', 'Иванов', 'Петров']);
+      expect(afterPersist.map((e) => e.lastName).toList(),
+          ['Альтов', 'Иванов', 'Петров']);
 
       // проверка что количество не меняется
       expect(afterPersist.length, beforePersist.length);
@@ -183,7 +189,7 @@ void main() {
 
     test('(f) add: assigns new id and saves', () async {
       // maxId = 5
-      await _writeRaw([t(2, 'B', 'b'), t(5, 'E', 'e')]);
+      await writeRaw([t(2, 'B', 'b'), t(5, 'E', 'e')]);
 
       final created = await repo.add(Teacher.create(
         lastName: 'A',
@@ -209,8 +215,10 @@ void main() {
       );
     });
 
-    test('(g) replaceById: true when replaced; false when id not found', () async {
-      await _writeRaw([t(1, 'Old', 'Name', mn: 'M', phone: '+70001112233', exp: 1)]);
+    test('(g) replaceById: true when replaced; false when id not found',
+        () async {
+      await writeRaw(
+          [t(1, 'Old', 'Name', mn: 'M', phone: '+70001112233', exp: 1)]);
 
       final ok = await repo.replaceById(
         1,
@@ -246,7 +254,7 @@ void main() {
     });
 
     test('(h) deleteById: true when deleted; false when absent', () async {
-      await _writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b')]);
+      await writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b')]);
 
       final ok = await repo.deleteById(1);
       expect(ok, isTrue);
@@ -263,10 +271,10 @@ void main() {
     });
 
     test('(i) getCount', () async {
-      await _writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b'), t(3, 'C', 'c')]);
+      await writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b'), t(3, 'C', 'c')]);
       expect(await repo.getCount(), 3);
 
-      await _writeRaw([]);
+      await writeRaw([]);
       expect(await repo.getCount(), 0);
     });
   });

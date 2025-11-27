@@ -1,0 +1,17 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/.dart_tool/**"
+    - "build/**"
+    - "coverage/**"
+
+linter:
+  rules:
+    always_declare_return_types: true
+    prefer_final_locals: true
+    prefer_final_fields: true
+    always_use_package_imports: true
+    directives_ordering: true
+    prefer_single_quotes: true

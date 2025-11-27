@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'package:postgres/postgres.dart';
+
 import 'package:information_systems_design/infrastructure/db/db_client.dart';
+import 'package:postgres/postgres.dart';
 
 class AppDb {
   // ---- Singleton ----
@@ -18,15 +19,14 @@ class AppDb {
   }
 
   /// Открытие подключения
-  Future<void> open({
-    required String host,
-    required int port,
-    required String database,
-    required String user,
-    required String password,
-    bool useSSL = false,
-    bool acceptBadCert = false
-  }) async {
+  Future<void> open(
+      {required String host,
+      required int port,
+      required String database,
+      required String user,
+      required String password,
+      bool useSSL = false,
+      bool acceptBadCert = false}) async {
     if (isOpen) return;
     _conn = PostgreSQLConnection(
       host,
@@ -39,44 +39,41 @@ class AppDb {
     await _conn!.open();
   }
 
-  Future<void> openFromENV({
-    String defaultHost = '127.0.0.1',
-    int defaultPort = 5432,
-    String defaultDb = 'postgres',
-    String defaultUser = 'postgres',
-    String defaultPass = 'postgres',
-    bool useSSL = false,
-    bool acceptBadCert = false
-  }) async {
+  Future<void> openFromENV(
+      {String defaultHost = '127.0.0.1',
+      int defaultPort = 5432,
+      String defaultDb = 'postgres',
+      String defaultUser = 'postgres',
+      String defaultPass = 'postgres',
+      bool useSSL = false,
+      bool acceptBadCert = false}) async {
     await open(
-      host: Platform.environment['PGHOST'] ?? defaultHost,
-      port: int.tryParse(Platform.environment['PGPORT'] ?? '') ?? defaultPort,
-      database: Platform.environment['PGDATABASE'] ?? defaultDb,
-      user: Platform.environment['PGUSER'] ?? defaultUser,
-      password: Platform.environment['PGPASSWORD'] ?? defaultPass,
-      useSSL: useSSL,
-      acceptBadCert: acceptBadCert
-    );
+        host: Platform.environment['PGHOST'] ?? defaultHost,
+        port: int.tryParse(Platform.environment['PGPORT'] ?? '') ?? defaultPort,
+        database: Platform.environment['PGDATABASE'] ?? defaultDb,
+        user: Platform.environment['PGUSER'] ?? defaultUser,
+        password: Platform.environment['PGPASSWORD'] ?? defaultPass,
+        useSSL: useSSL,
+        acceptBadCert: acceptBadCert);
   }
 
   Future<void> close() async {
-    if(isOpen) {
+    if (isOpen) {
       await _conn!.close();
       _conn = null;
     }
   }
 
-  Future<List<List<dynamic>>> query(
-    String sql, {Map<String, dynamic>? params}
-  ) => conn.query(sql, substitutionValues: params);
+  Future<List<List<dynamic>>> query(String sql,
+          {Map<String, dynamic>? params}) =>
+      conn.query(sql, substitutionValues: params);
 
-  Future<List<Map<String, Map<String, dynamic>>>> mappedQuery(
-    String sql, {Map<String, dynamic>? params}
-  ) => conn.mappedResultsQuery(sql, substitutionValues: params);
+  Future<List<Map<String, Map<String, dynamic>>>> mappedQuery(String sql,
+          {Map<String, dynamic>? params}) =>
+      conn.mappedResultsQuery(sql, substitutionValues: params);
 
-  Future<int> execute(
-    String sql, {Map<String, dynamic>? params}
-  ) => conn.execute(sql, substitutionValues: params);
+  Future<int> execute(String sql, {Map<String, dynamic>? params}) =>
+      conn.execute(sql, substitutionValues: params);
 
   Future<R> transaction<R>(Future<R> Function(DbTx tx) action) async {
     final R res = await conn.transaction(
@@ -97,11 +94,15 @@ class _PgTx implements DbTx {
   _PgTx(this._ctx);
 
   @override
-  Future<int> execute(String sql, {Map<String, dynamic>? params}) => _ctx.execute(sql, substitutionValues: params);
+  Future<int> execute(String sql, {Map<String, dynamic>? params}) =>
+      _ctx.execute(sql, substitutionValues: params);
 
   @override
-  Future<List<List>> query(String sql, {Map<String, dynamic>? params}) => _ctx.query(sql, substitutionValues: params);
+  Future<List<List>> query(String sql, {Map<String, dynamic>? params}) =>
+      _ctx.query(sql, substitutionValues: params);
 
   @override
-  Future<List<Map<String, Map<String, dynamic>>>> mappedQuery(sql, {Map<String, dynamic>? params}) => _ctx.mappedResultsQuery(sql, substitutionValues: params);  
+  Future<List<Map<String, Map<String, dynamic>>>> mappedQuery(sql,
+          {Map<String, dynamic>? params}) =>
+      _ctx.mappedResultsQuery(sql, substitutionValues: params);
 }

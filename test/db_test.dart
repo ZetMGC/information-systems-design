@@ -1,22 +1,22 @@
 import 'dart:io';
-import 'package:test/test.dart';
 
 import 'package:information_systems_design/domain/teacher_lib.dart';
 import 'package:information_systems_design/infrastructure/db/app_db.dart';
 import 'package:information_systems_design/infrastructure/db/pg_db_client_adapter.dart';
 import 'package:information_systems_design/infrastructure/db/query_spec.dart';
 import 'package:information_systems_design/infrastructure/db/teacher_rep_db_decor.dart';
+import 'package:test/test.dart';
 
 void main() {
   late AppDb appDb;
   late PgDbClientAdapter dbClient;
   late TeacherRepDb repo;
 
-  final host   = Platform.environment['PGHOST'] ?? '127.0.0.1';
-  final port   = int.parse(Platform.environment['PGPORT'] ?? '5432');
+  final host = Platform.environment['PGHOST'] ?? '127.0.0.1';
+  final port = int.parse(Platform.environment['PGPORT'] ?? '5432');
   final dbName = Platform.environment['PGDATABASE'] ?? 'postgres';
-  final user   = Platform.environment['PGUSER'] ?? 'postgres';
-  final pass   = Platform.environment['PGPASSWORD'] ?? 'postgres';
+  final user = Platform.environment['PGUSER'] ?? 'postgres';
+  final pass = Platform.environment['PGPASSWORD'] ?? 'postgres';
 
   setUpAll(() async {
     appDb = AppDb.I;
@@ -56,7 +56,7 @@ void main() {
     await appDb.close();
   });
 
-  Future<int> _seed({
+  Future<int> seed({
     required String ln,
     required String fn,
     String? mn,
@@ -77,8 +77,14 @@ void main() {
 
   group('TeacherRepDB', () {
     test('(a) getById: returns Teacher or null; invalid id throws', () async {
-      final id1 = await _seed(ln: 'Иванов', fn: 'Иван', mn: 'Иваныч', phone: '+79990000001', exp: 5);
-      final id2 = await _seed(ln: 'Петров', fn: 'Пётр', phone: '+79990000002', exp: 3);
+      final id1 = await seed(
+          ln: 'Иванов',
+          fn: 'Иван',
+          mn: 'Иваныч',
+          phone: '+79990000001',
+          exp: 5);
+      final id2 =
+          await seed(ln: 'Петров', fn: 'Пётр', phone: '+79990000002', exp: 3);
 
       final t2 = await repo.getById(id2);
       expect(t2, isNotNull);
@@ -99,10 +105,17 @@ void main() {
       expect(t1!.middleName, 'Иваныч');
     });
 
-    test('(b) getKthNShortList: sorted by lastName/firstName/id with pagination', () async {
-      await _seed(ln: 'Иванов', fn: 'Иван', mn: 'Иваныч', phone: '+79990000001', exp: 5);
-      await _seed(ln: 'Петров', fn: 'Пётр', phone: '+79990000002', exp: 3);
-      await _seed(ln: 'Альтов', fn: 'Антон', phone: '+79990000003', exp: 2);
+    test(
+        '(b) getKthNShortList: sorted by lastName/firstName/id with pagination',
+        () async {
+      await seed(
+          ln: 'Иванов',
+          fn: 'Иван',
+          mn: 'Иваныч',
+          phone: '+79990000001',
+          exp: 5);
+      await seed(ln: 'Петров', fn: 'Пётр', phone: '+79990000002', exp: 3);
+      await seed(ln: 'Альтов', fn: 'Антон', phone: '+79990000003', exp: 2);
 
       final p1 = await repo.getKthNShortList(k: 2, n: 1);
       expect(p1.length, 2);
@@ -162,7 +175,8 @@ void main() {
     });
 
     test('(d) replaceById: true if updated, false if not found', () async {
-      final id = await _seed(ln: 'Old', fn: 'Name', mn: 'M', phone: '+79990000020', exp: 1);
+      final id = await seed(
+          ln: 'Old', fn: 'Name', mn: 'M', phone: '+79990000020', exp: 1);
 
       final ok = await repo.replaceById(
         id,
@@ -198,15 +212,20 @@ void main() {
       expect(
         () => repo.replaceById(
           0,
-          Teacher.create(lastName: 'A', firstName: 'a', phone: '+79990000023', experienceYears: 1),
+          Teacher.create(
+              lastName: 'A',
+              firstName: 'a',
+              phone: '+79990000023',
+              experienceYears: 1),
         ),
         throwsArgumentError,
       );
     });
 
-    test('(e) deleteById: true if deleted, false if absent; invalid id throws', () async {
-      final id1 = await _seed(ln: 'A', fn: 'a', phone: '+79990000030', exp: 1);
-      final id2 = await _seed(ln: 'B', fn: 'b', phone: '+79990000031', exp: 2);
+    test('(e) deleteById: true if deleted, false if absent; invalid id throws',
+        () async {
+      final id1 = await seed(ln: 'A', fn: 'a', phone: '+79990000030', exp: 1);
+      final id2 = await seed(ln: 'B', fn: 'b', phone: '+79990000031', exp: 2);
 
       final ok = await repo.deleteById(id1);
       expect(ok, isTrue);
@@ -224,9 +243,9 @@ void main() {
     test('(f) getCount', () async {
       expect(await repo.getCount(), 0);
 
-      await _seed(ln: 'A', fn: 'a', phone: '+79990000040', exp: 1);
-      await _seed(ln: 'B', fn: 'b', phone: '+79990000041', exp: 2);
-      await _seed(ln: 'C', fn: 'c', phone: '+79990000042', exp: 3);
+      await seed(ln: 'A', fn: 'a', phone: '+79990000040', exp: 1);
+      await seed(ln: 'B', fn: 'b', phone: '+79990000041', exp: 2);
+      await seed(ln: 'C', fn: 'c', phone: '+79990000042', exp: 3);
 
       expect(await repo.getCount(), 3);
 
@@ -237,15 +256,15 @@ void main() {
 
   group('TeacherRepDbDecor', () {
     test('(g) getKthNShortList uses filter and sort options', () async {
-      await _seed(ln: 'Smith', fn: 'Anna', phone: '+79990000050', exp: 2);
-      await _seed(ln: 'Brown', fn: 'Charlie', phone: '+79990000051', exp: 7);
-      await _seed(ln: 'Adams', fn: 'Bob', phone: '+79990000052', exp: 5);
+      await seed(ln: 'Smith', fn: 'Anna', phone: '+79990000050', exp: 2);
+      await seed(ln: 'Brown', fn: 'Charlie', phone: '+79990000051', exp: 7);
+      await seed(ln: 'Adams', fn: 'Bob', phone: '+79990000052', exp: 5);
 
       final decor = TeacherRepDbDecor(
         inner: repo,
         db: dbClient,
         filter: QueryFilter('experience_years >= @minExp', {'minExp': 5}),
-        sort: const QuerySort(SortField.first_name, asc: false),
+        sort: const QuerySort(SortField.firstName, asc: false),
       );
 
       final page = await decor.getKthNShortList(k: 5, n: 1);
@@ -256,9 +275,9 @@ void main() {
     });
 
     test('(h) getCount respects filter params', () async {
-      await _seed(ln: 'Zero', fn: 'One', phone: '+79990000060', exp: 1);
-      await _seed(ln: 'Hero', fn: 'Two', phone: '+79990000061', exp: 4);
-      await _seed(ln: 'Hero', fn: 'Three', phone: '+79990000062', exp: 6);
+      await seed(ln: 'Zero', fn: 'One', phone: '+79990000060', exp: 1);
+      await seed(ln: 'Hero', fn: 'Two', phone: '+79990000061', exp: 4);
+      await seed(ln: 'Hero', fn: 'Three', phone: '+79990000062', exp: 6);
 
       final decor = TeacherRepDbDecor(
         inner: repo,

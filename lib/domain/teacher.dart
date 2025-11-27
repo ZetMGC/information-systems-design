@@ -5,23 +5,17 @@ import 'package:information_systems_design/domain/teacher_info.dart';
 class Teacher extends TeacherInfo {
   // --- private fields ---
   final int _experienceYears;
-  
+
   // --- base constructor ---
   const Teacher._({
-    required int? id,
-    required String lastName,
-    required String firstName,
-    String? middleName,
-    required String phone,
+    required super.id,
+    required super.lastName,
+    required super.firstName,
+    super.middleName,
+    required super.phone,
     required int experienceYears,
   })  : _experienceYears = experienceYears,
-        super.internal(
-          id: id,
-          lastName: lastName,
-          firstName: firstName,
-          middleName: middleName,
-          phone: phone,
-        );
+        super.internal();
 
   // --- getter ---
   int get experienceYears => _experienceYears;
@@ -39,8 +33,10 @@ class Teacher extends TeacherInfo {
     TeacherInfo.validateNameField(lastName, 'Фамилия');
     TeacherInfo.validateNameField(firstName, 'Имя');
     TeacherInfo.validateNameField(middleName, 'Отчество', optional: true);
-    TeacherInfo.require(TeacherInfo.isValidPhone(phone), 'Некорректный телефон');
-    TeacherInfo.require(isValidExperience(experienceYears), 'Некорректный стаж');
+    TeacherInfo.require(
+        TeacherInfo.isValidPhone(phone), 'Некорректный телефон');
+    TeacherInfo.require(
+        isValidExperience(experienceYears), 'Некорректный стаж');
   }
 
   // --- factory ---
@@ -52,49 +48,51 @@ class Teacher extends TeacherInfo {
     String separator = ';',
   }) {
     switch (source) {
-      case Teacher t:
+      case final Teacher t:
         return t;
 
-      case String s: {
-        final t = s.trim();
-        if (t.isEmpty) {
-          throw FormatException('Пустая строка не поддерживается');
+      case final String s:
+        {
+          final t = s.trim();
+          if (t.isEmpty) {
+            throw FormatException('Пустая строка не поддерживается');
+          }
+
+          if ((t.startsWith('{') && t.endsWith('}')) ||
+              (t.startsWith('[') && t.endsWith(']'))) {
+            final decoded = jsonDecode(t);
+            return Teacher.from(decoded);
+          }
+          return Teacher.fromString(t, separator: separator);
         }
 
-        if ((t.startsWith('{') && t.endsWith('}')) ||
-            (t.startsWith('[') && t.endsWith(']'))) {
-          final decoded = jsonDecode(t);
-          return Teacher.from(decoded); 
-        }
-        return Teacher.fromString(t, separator: separator);
-      }
-
-      case Map<String, dynamic> m:
+      case final Map<String, dynamic> m:
         return Teacher.fromJson(m);
 
-      case Map otherMap: {
-        final m = <String, dynamic>{};
-        for (final e in otherMap.entries) {
-          final key = e.key.toString();
-          m[key] = e.value;
+      case final Map otherMap:
+        {
+          final m = <String, dynamic>{};
+          for (final e in otherMap.entries) {
+            final key = e.key.toString();
+            m[key] = e.value;
+          }
+          return Teacher.fromJson(m);
         }
-        return Teacher.fromJson(m);
-      }
 
-      case List l:
+      case final List l:
         return _fromList(l);
 
-      case Iterable it:
+      case final Iterable it:
         return _fromList(it.toList());
 
-      case ({
-        int id,
-        String lastName,
-        String firstName,
-        String? middleName,
-        String phone,
-        int experienceYears,
-      }) recWithId:
+      case final ({
+          int id,
+          String lastName,
+          String firstName,
+          String? middleName,
+          String phone,
+          int experienceYears,
+        }) recWithId:
         return Teacher.withId(
           id: recWithId.id,
           lastName: recWithId.lastName,
@@ -104,13 +102,13 @@ class Teacher extends TeacherInfo {
           experienceYears: recWithId.experienceYears,
         );
 
-      case ({
-        String lastName,
-        String firstName,
-        String? middleName,
-        String phone,
-        int experienceYears,
-      }) recNoId:
+      case final ({
+          String lastName,
+          String firstName,
+          String? middleName,
+          String phone,
+          int experienceYears,
+        }) recNoId:
         return Teacher.create(
           lastName: recNoId.lastName,
           firstName: recNoId.firstName,
@@ -235,12 +233,13 @@ class Teacher extends TeacherInfo {
         experienceYears: experienceYears,
       );
     } else {
-      throw FormatException('Неверное количество полей: ${parts.length}, ожидалось 5 или 6');
+      throw FormatException(
+          'Неверное количество полей: ${parts.length}, ожидалось 5 или 6');
     }
   }
 
   factory Teacher.fromJson(Map<String, dynamic> json) {
-    T? _read<T>(List<String> keys, {T? defaultValue, bool required = false}) {
+    T? read<T>(List<String> keys, {T? defaultValue, bool required = false}) {
       for (final k in keys) {
         if (json.containsKey(k) && json[k] != null) {
           final v = json[k];
@@ -252,17 +251,23 @@ class Teacher extends TeacherInfo {
         }
       }
       if (required) {
-        throw FormatException('Отсутствует обязательное поле: ${keys.join("|")}');
+        throw FormatException(
+            'Отсутствует обязательное поле: ${keys.join("|")}');
       }
       return defaultValue;
     }
 
-    final int? id = _read<int>(['id', 'teacherId']);
-    final String lastName = _read<String>(['lastName', 'last_name'], required: true)!;
-    final String firstName = _read<String>(['firstName', 'first_name'], required: true)!;
-    final String? middleName = _read<String?>(['middleName', 'middle_name'], defaultValue: null);
-    final String phone = _read<String>(['phone', 'phoneNumber', 'phone_number'], required: true)!;
-    final int experienceYears = _read<int>(['experienceYears', 'experience_years'], required: true)!;
+    final int? id = read<int>(['id', 'teacherId']);
+    final String lastName =
+        read<String>(['lastName', 'last_name'], required: true)!;
+    final String firstName =
+        read<String>(['firstName', 'first_name'], required: true)!;
+    final String? middleName =
+        read<String?>(['middleName', 'middle_name'], defaultValue: null);
+    final String phone = read<String>(['phone', 'phoneNumber', 'phone_number'],
+        required: true)!;
+    final int experienceYears =
+        read<int>(['experienceYears', 'experience_years'], required: true)!;
 
     return (id == null)
         ? Teacher.create(
@@ -281,18 +286,21 @@ class Teacher extends TeacherInfo {
             experienceYears: experienceYears,
           );
   }
-  
+
   static Teacher _fromList(List list) {
     if (list.length == 5) {
       final ln = list[0]?.toString() ?? '';
       final fn = list[1]?.toString() ?? '';
       final mnRaw = list[2];
       final phone = list[3]?.toString() ?? '';
-      final exp = (list[4] is int) ? list[4] as int : int.tryParse(list[4].toString());
+      final exp =
+          (list[4] is int) ? list[4] as int : int.tryParse(list[4].toString());
       if (exp == null) {
         throw FormatException('Стаж должен быть числом: ${list[4]}');
       }
-      final mn = (mnRaw == null) ? null : (mnRaw.toString().trim().isEmpty ? null : mnRaw.toString());
+      final mn = (mnRaw == null)
+          ? null
+          : (mnRaw.toString().trim().isEmpty ? null : mnRaw.toString());
       return Teacher.create(
         lastName: ln,
         firstName: fn,
@@ -301,7 +309,8 @@ class Teacher extends TeacherInfo {
         experienceYears: exp,
       );
     } else if (list.length == 6) {
-      final id = (list[0] is int) ? list[0] as int : int.tryParse(list[0].toString());
+      final id =
+          (list[0] is int) ? list[0] as int : int.tryParse(list[0].toString());
       if (id == null || id <= 0) {
         throw FormatException('Некорректный id: ${list[0]}');
       }
@@ -309,11 +318,14 @@ class Teacher extends TeacherInfo {
       final fn = list[2]?.toString() ?? '';
       final mnRaw = list[3];
       final phone = list[4]?.toString() ?? '';
-      final exp = (list[5] is int) ? list[5] as int : int.tryParse(list[5].toString());
+      final exp =
+          (list[5] is int) ? list[5] as int : int.tryParse(list[5].toString());
       if (exp == null) {
         throw FormatException('Стаж должен быть числом: ${list[5]}');
       }
-      final mn = (mnRaw == null) ? null : (mnRaw.toString().trim().isEmpty ? null : mnRaw.toString());
+      final mn = (mnRaw == null)
+          ? null
+          : (mnRaw.toString().trim().isEmpty ? null : mnRaw.toString());
       return Teacher.withId(
         id: id,
         lastName: ln,
@@ -323,20 +335,22 @@ class Teacher extends TeacherInfo {
         experienceYears: exp,
       );
     } else {
-      throw FormatException('Ожидалось 5 или 6 элементов, получено: ${list.length}');
+      throw FormatException(
+          'Ожидалось 5 или 6 элементов, получено: ${list.length}');
     }
   }
 
   // --- Вывод ---
   /// Текстовое представление класса.
   @override
-  String toString() => 'Teacher(${toShortString()}, experienceYears: $_experienceYears)';
+  String toString() =>
+      'Teacher(${toShortString()}, experienceYears: $_experienceYears)';
 
-	@override
+  @override
   Map<String, dynamic> toJson() {
-    final short_info = super.toJson();
-		short_info['experience_years'] = experienceYears;
-		return short_info;
+    final shortInfo = super.toJson();
+    shortInfo['experience_years'] = experienceYears;
+    return shortInfo;
   }
 
   /// Перегрузка оператора равенства для сравнения объектов.
@@ -344,8 +358,8 @@ class Teacher extends TeacherInfo {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is Teacher &&
-          super == other &&
-          other._experienceYears == _experienceYears;
+        super == other &&
+        other._experienceYears == _experienceYears;
   }
 
   @override

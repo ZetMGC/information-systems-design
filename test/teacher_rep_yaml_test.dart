@@ -1,10 +1,11 @@
 import 'dart:io';
-import 'package:test/test.dart';
+
 import 'package:information_systems_design/domain/teacher_lib.dart';
 import 'package:json2yaml/json2yaml.dart';
+import 'package:test/test.dart';
 
 void main() {
-  group('TeacherRepYaml', (){
+  group('TeacherRepYaml', () {
     late Directory tmp;
     late String path;
     late TeacherRepYaml repo;
@@ -21,22 +22,24 @@ void main() {
       }
     });
 
-    Future<void> _writeYaml(String yaml) async {
+    Future<void> writeYaml(String yaml) async {
       final f = File(path);
       await f.parent.create(recursive: true);
       await f.writeAsString(yaml, flush: true);
     }
 
     /// YAML с корнем-списком (— элементы)
-    Future<void> _writeYamlList(List<Map<String, dynamic>> rows) => _writeYaml(json2yaml(<String, dynamic>{'teachers': rows}, yamlStyle: YamlStyle.pubspecYaml));
+    Future<void> writeYamlList(List<Map<String, dynamic>> rows) =>
+        writeYaml(json2yaml(<String, dynamic>{'teachers': rows},
+            yamlStyle: YamlStyle.pubspecYaml));
 
     /// YAML с корнем-объектом: {teachers: [...]}
-  Future<void> _writeYamlTeachers(List<Map<String, dynamic>> rows) async {
-    final yaml = json2yaml(<String, dynamic>{'teachers': rows}); // rows == [] → "teachers: []"
-    await File(path).parent.create(recursive: true);
-    await File(path).writeAsString(yaml, flush: true);
-  }
-
+    Future<void> writeYamlTeachers(List<Map<String, dynamic>> rows) async {
+      final yaml = json2yaml(
+          <String, dynamic>{'teachers': rows}); // rows == [] → "teachers: []"
+      await File(path).parent.create(recursive: true);
+      await File(path).writeAsString(yaml, flush: true);
+    }
 
     Map<String, dynamic> row(
       int id,
@@ -68,15 +71,16 @@ void main() {
     });
 
     test('(a) readAll: wrong root -> FormatException', () async {
-      await _writeYaml(json2yaml(<String, dynamic>{'not': 'a list'}));
+      await writeYaml(json2yaml(<String, dynamic>{'not': 'a list'}));
       expect(repo.readAll, throwsFormatException);
     });
 
     test('(a/b) readAll <-> writeAll round-trip (root=list)', () async {
       final rows = [
-        row(1, 'Петров', 'Пётр', mn: 'Сергеевич', phone: '+79990001122', exp: 7),
+        row(1, 'Петров', 'Пётр',
+            mn: 'Сергеевич', phone: '+79990001122', exp: 7),
       ];
-      await _writeYamlList(rows);
+      await writeYamlList(rows);
 
       final list = await repo.readAll();
       expect(list.length, 1);
@@ -87,7 +91,7 @@ void main() {
       expect(list.first.phone, '+79990001122');
       expect(list.first.experienceYears, 7);
 
-      await repo.writeAll(list);       
+      await repo.writeAll(list);
       final list2 = await repo.readAll();
       expect(list2.length, 1);
       expect(list2.first.toJson(), rows.first);
@@ -98,14 +102,15 @@ void main() {
         row(2, 'Иванов', 'Иван', phone: '+79990000001', exp: 3),
         row(3, 'Альтов', 'Антон', phone: '+79990000002', exp: 2),
       ];
-      await _writeYamlTeachers(rows); 
+      await writeYamlTeachers(rows);
 
       final list = await repo.readAll();
       expect(list.length, 2);
       expect(list.map((e) => e.id).toList(), [2, 3]);
     });
 
-    test('(a) readAll: mixed element formats (Map, JSON-string, CSV-string)', () async {
+    test('(a) readAll: mixed element formats (Map, JSON-string, CSV-string)',
+        () async {
       final m1 = {
         'id': 10,
         'last_name': 'А',
@@ -114,10 +119,13 @@ void main() {
         'experience_years': 3,
       };
 
-      final jsonString = '{"id":11,"last_name":"B","first_name":"b","phone":"+79990000004","experience_years":2}';
+      final jsonString =
+          '{"id":11,"last_name":"B","first_name":"b","phone":"+79990000004","experience_years":2}';
       final csv = 'Ivanov;Ivan;;+79990000005;5';
 
-      await _writeYaml(json2yaml(<String, dynamic>{'teachers':[m1, jsonString, csv]}, yamlStyle: YamlStyle.pubspecYaml));
+      await writeYaml(json2yaml(<String, dynamic>{
+        'teachers': [m1, jsonString, csv]
+      }, yamlStyle: YamlStyle.pubspecYaml));
 
       final list = await repo.readAll();
       expect(list.length, 3);
@@ -134,7 +142,7 @@ void main() {
     });
 
     test('(c) getById', () async {
-      await _writeYamlList([row(1, 'A', 'a'), row(2, 'B', 'b')]);
+      await writeYamlList([row(1, 'A', 'a'), row(2, 'B', 'b')]);
 
       expect(await repo.getById(2), isNotNull);
       expect((await repo.getById(2))!.lastName, 'B');
@@ -144,7 +152,7 @@ void main() {
     });
 
     test('(d) getKthNShortList: pagination + sort by lastName ASC', () async {
-      await _writeYamlList([
+      await writeYamlList([
         row(3, 'Иванов', 'Иван', mn: 'Иваныч'),
         row(1, 'Петров', 'Пётр'),
         row(2, 'Альтов', 'Антон'),
@@ -153,7 +161,7 @@ void main() {
       expect(p1.length, 2);
       expect(p1[0].lastName, 'Альтов');
       expect(p1[1].lastName, 'Иванов');
-      expect(p1[1].middleName, 'Иваныч'); 
+      expect(p1[1].middleName, 'Иваныч');
 
       final p2 = await repo.getKthNShortList(k: 2, n: 2);
       expect(p2.length, 1);
@@ -166,24 +174,27 @@ void main() {
       expect(() => repo.getKthNShortList(k: 1, n: 0), throwsArgumentError);
     });
 
-    test('(e) sortByLastName: returns sorted copy; persist=true writes YAML', () async {
-      await _writeYamlList([
+    test('(e) sortByLastName: returns sorted copy; persist=true writes YAML',
+        () async {
+      await writeYamlList([
         row(3, 'Иванов', 'Иван'),
         row(1, 'Петров', 'Пётр'),
         row(2, 'Альтов', 'Антон'),
       ]);
 
       final sorted = await repo.sortByLastName();
-      expect(sorted.map((e) => e.lastName).toList(), ['Альтов', 'Иванов', 'Петров']);
+      expect(sorted.map((e) => e.lastName).toList(),
+          ['Альтов', 'Иванов', 'Петров']);
 
       // зафиксируем порядок в файле
       await repo.sortByLastName(persist: true);
       final after = await repo.readAll();
-      expect(after.map((e) => e.lastName).toList(), ['Альтов', 'Иванов', 'Петров']);
+      expect(after.map((e) => e.lastName).toList(),
+          ['Альтов', 'Иванов', 'Петров']);
     });
 
     test('(f) add: assigns new id and saves YAML', () async {
-      await _writeYamlList([row(2, 'B', 'b'), row(5, 'E', 'e')]); 
+      await writeYamlList([row(2, 'B', 'b'), row(5, 'E', 'e')]);
 
       final created = await repo.add(Teacher.create(
         lastName: 'A',
@@ -208,8 +219,10 @@ void main() {
       );
     });
 
-    test('(g) replaceById: true when replaced; false when id not found', () async {
-      await _writeYamlList([row(1, 'Old', 'Name', mn: 'M', phone: '+70000000000', exp: 1)]);
+    test('(g) replaceById: true when replaced; false when id not found',
+        () async {
+      await writeYamlList(
+          [row(1, 'Old', 'Name', mn: 'M', phone: '+70000000000', exp: 1)]);
 
       final ok = await repo.replaceById(
         1,
@@ -245,7 +258,7 @@ void main() {
     });
 
     test('(h) deleteById: true when deleted; false when absent', () async {
-      await _writeYamlList([row(1, 'A', 'a'), row(2, 'B', 'b')]);
+      await writeYamlList([row(1, 'A', 'a'), row(2, 'B', 'b')]);
 
       final ok = await repo.deleteById(1);
       expect(ok, isTrue);
@@ -261,19 +274,20 @@ void main() {
     });
 
     test('(i) getCount', () async {
-    // 3 записи
-    await _writeYamlTeachers([row(1,'A','a'), row(2,'B','b'), row(3,'C','c')]);
-    expect(await repo.getCount(), 3);
+      // 3 записи
+      await writeYamlTeachers(
+          [row(1, 'A', 'a'), row(2, 'B', 'b'), row(3, 'C', 'c')]);
+      expect(await repo.getCount(), 3);
 
-    // записан пустой список -> 0
-    await _writeYamlTeachers([]);
-    expect(await repo.getCount(), 0);
+      // записан пустой список -> 0
+      await writeYamlTeachers([]);
+      expect(await repo.getCount(), 0);
 
-    // без изменений файла остаётся 0
-    expect(await repo.getCount(), 0);
+      // без изменений файла остаётся 0
+      expect(await repo.getCount(), 0);
 
-    await _writeYamlList([]);
-    expect(await repo.getCount(), 0);
-  });
+      await writeYamlList([]);
+      expect(await repo.getCount(), 0);
+    });
   });
 }

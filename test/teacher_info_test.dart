@@ -1,9 +1,10 @@
-import 'package:test/test.dart';
 import 'package:information_systems_design/domain/teacher_lib.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('TeacherInfo.brief', () {
-    test('валидные данные: создаётся, нормализует и формирует краткий вывод', () {
+    test('валидные данные: создаётся, нормализует и формирует краткий вывод',
+        () {
       final info = TeacherInfo.brief(
         id: 7,
         lastName: '  Орлов  ',
@@ -30,7 +31,7 @@ void main() {
           lastName: 'Иванов',
           firstName: 'Иван',
           middleName: null,
-          phone: '12345', 
+          phone: '12345',
         ),
         throwsA(isA<ArgumentError>()),
       );

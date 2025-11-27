@@ -1,14 +1,12 @@
 import 'package:information_systems_design/domain/teacher.dart';
 import 'package:information_systems_design/domain/teacher_info.dart';
 import 'package:information_systems_design/domain/teacher_rep_base.dart';
-import 'package:information_systems_design/infrastructure/db/app_db.dart';
 import 'package:information_systems_design/infrastructure/db/db_client.dart';
-import 'package:postgres/postgres.dart';
 
 class TeacherRepDb extends TeacherRepBase {
   final DbClient db;
-  
-  TeacherRepDb(this.db);  
+
+  TeacherRepDb(this.db);
 
   @override
   String get path => 'db:postgres';
@@ -23,7 +21,7 @@ class TeacherRepDb extends TeacherRepBase {
 
   @override
   Future<Teacher?> getById(int id) async {
-    if (id <= 0) throw ArgumentError.value(id , "id", "id must be > 0");
+    if (id <= 0) throw ArgumentError.value(id, 'id', 'id must be > 0');
 
     const sql = '''
       SELECT id, last_name, first_name, middle_name, phone, experience_years
@@ -37,8 +35,7 @@ class TeacherRepDb extends TeacherRepBase {
 
     final m = rows.first['teachers']!;
 
-    return Teacher.from(
-    <String, dynamic>{
+    return Teacher.from(<String, dynamic>{
       'id': m['id'],
       'first_name': m['first_name'],
       'last_name': m['last_name'],
@@ -49,10 +46,8 @@ class TeacherRepDb extends TeacherRepBase {
   }
 
   @override
-  Future<List<TeacherInfo>> getKthNShortList ({
-    required int k, 
-    required int n
-  }) async {
+  Future<List<TeacherInfo>> getKthNShortList(
+      {required int k, required int n}) async {
     if (k <= 0) throw ArgumentError.value(k, 'k', 'k must be > 0');
     if (n <= 0) throw ArgumentError.value(n, 'n', 'n must be > 0');
 
@@ -70,19 +65,18 @@ class TeacherRepDb extends TeacherRepBase {
     return rows.map((r) {
       final m = r['teachers']!;
       return TeacherInfo.brief(
-        id: m['id'] as int?, 
-        lastName: m['last_name'] as String, 
-        firstName: m['first_name'] as String, 
-        middleName: m['middle_name'] as String?, 
-        phone: m['phone'] as String
-      );
+          id: m['id'] as int?,
+          lastName: m['last_name'] as String,
+          firstName: m['first_name'] as String,
+          middleName: m['middle_name'] as String?,
+          phone: m['phone'] as String);
     }).toList();
   }
-  
+
   @override
   Future<Teacher> add(Teacher item) async {
     if (item.id != null) {
-      throw ArgumentError("id must be null to add the new item!");
+      throw ArgumentError('id must be null to add the new item!');
     }
 
     const sql = '''
@@ -102,18 +96,17 @@ class TeacherRepDb extends TeacherRepBase {
     final m = rows.first['teachers']!;
 
     return Teacher.withId(
-      id: m['id'] as int, 
-      lastName: m['last_name'] as String, 
-      firstName: m['first_name'] as String, 
-      middleName: m['middle_name'] as String?, 
-      phone: m['phone'] as String, 
-      experienceYears: m['experience_years'] as int
-    );
+        id: m['id'] as int,
+        lastName: m['last_name'] as String,
+        firstName: m['first_name'] as String,
+        middleName: m['middle_name'] as String?,
+        phone: m['phone'] as String,
+        experienceYears: m['experience_years'] as int);
   }
 
   @override
   Future<bool> replaceById(int id, Teacher item) async {
-    if (id <= 0) throw ArgumentError.value(id , "id", "id must be > 0");
+    if (id <= 0) throw ArgumentError.value(id, 'id', 'id must be > 0');
 
     const sql = '''
       UPDATE teachers
@@ -121,7 +114,7 @@ class TeacherRepDb extends TeacherRepBase {
       WHERE id = @id
     ''';
 
-    final res = await db.execute(sql, params: {
+    await db.execute(sql, params: {
       'ln': item.lastName,
       'fn': item.firstName,
       'mn': item.middleName,
@@ -130,12 +123,13 @@ class TeacherRepDb extends TeacherRepBase {
       'id': id
     });
 
-    final check = await db.query('SELECT 1 FROM teachers WHERE id=@id', params: {'id': id});
+    final check = await db
+        .query('SELECT 1 FROM teachers WHERE id=@id', params: {'id': id});
     return check.isNotEmpty;
   }
 
   Future<bool> replaceByIdReturning(int id, Teacher item) async {
-    if (id <= 0) throw ArgumentError.value(id , "id", "id must be > 0");
+    if (id <= 0) throw ArgumentError.value(id, 'id', 'id must be > 0');
 
     const sql = '''
       UPDATE teachers
@@ -145,20 +139,20 @@ class TeacherRepDb extends TeacherRepBase {
     ''';
 
     final rows = await db.query(sql, params: {
-      'ln': item.lastName, 
-      'fn': item.firstName, 
+      'ln': item.lastName,
+      'fn': item.firstName,
       'mn': item.middleName,
-      'ph': item.phone, 
-      'exp': item.experienceYears, 
+      'ph': item.phone,
+      'exp': item.experienceYears,
       'id': id,
     });
 
     return rows.isNotEmpty;
   }
-  
+
   @override
   Future<bool> deleteById(int id) async {
-    if (id <= 0) throw ArgumentError.value(id , "id", "id must be > 0");
+    if (id <= 0) throw ArgumentError.value(id, 'id', 'id must be > 0');
 
     const sql = '''
       DELETE FROM teachers WHERE id=@id RETURNING id
@@ -174,6 +168,5 @@ class TeacherRepDb extends TeacherRepBase {
     final rows = await db.query(sql);
 
     return rows.first.first as int;
-  }  
+  }
 }
-

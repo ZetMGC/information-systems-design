@@ -1,10 +1,9 @@
 import 'dart:io';
 
-import 'package:yaml/yaml.dart';
-import 'package:json2yaml/json2yaml.dart';
-
 import 'package:information_systems_design/domain/teacher.dart';
 import 'package:information_systems_design/domain/teacher_rep_base.dart';
+import 'package:json2yaml/json2yaml.dart';
+import 'package:yaml/yaml.dart';
 
 class TeacherRepYaml extends TeacherRepBase {
   @override
@@ -48,10 +47,12 @@ class TeacherRepYaml extends TeacherRepBase {
           throw const FormatException('Field "teachers" must be a list.');
         }
       } else {
-        throw const FormatException('YAML root must be a List or {teachers: [...]}');
+        throw const FormatException(
+            'YAML root must be a List or {teachers: [...]}');
       }
     } else {
-      throw const FormatException('YAML root must be a List or {teachers: [...]}');
+      throw const FormatException(
+          'YAML root must be a List or {teachers: [...]}');
     }
 
     final out = <Teacher>[];
@@ -79,4 +80,3 @@ class TeacherRepYaml extends TeacherRepBase {
     await file.writeAsString(yamlText, flush: true);
   }
 }
-

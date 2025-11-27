@@ -1,4 +1,4 @@
-enum SortField {last_name, first_name, id, experience_years}
+enum SortField { lastName, firstName, id, experienceYears }
 
 class QuerySort {
   final SortField field;
@@ -7,10 +7,10 @@ class QuerySort {
 
   String toOrderBySql() {
     final col = switch (field) {
-      SortField.last_name => 'lower(last_name)',
-      SortField.first_name => 'lower(first_name)',
+      SortField.lastName => 'lower(last_name)',
+      SortField.firstName => 'lower(first_name)',
       SortField.id => 'id',
-      SortField.experience_years => 'experience_years'
+      SortField.experienceYears => 'experience_years'
     };
 
     return '$col ${asc ? 'ASC' : 'DESC'}, id ASC';

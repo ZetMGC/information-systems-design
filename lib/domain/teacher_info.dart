@@ -2,10 +2,10 @@
 
 class TeacherInfo {
   // ---- краткие поля ----
-  final int? _id;                
+  final int? _id;
   final String _lastName;
   final String _firstName;
-  final String? _middleName;      
+  final String? _middleName;
   final String _phone;
 
   // ---- base constructor ----
@@ -22,13 +22,18 @@ class TeacherInfo {
         _phone = phone;
 
   // ---- public constructor ----
-  const TeacherInfo.internal({
-    required int? id,
-    required String lastName,
-    required String firstName,
-    String? middleName,
-    required String phone
-  }) : this._(id: id, lastName: lastName, firstName: firstName, middleName:middleName, phone : phone);
+  const TeacherInfo.internal(
+      {required int? id,
+      required String lastName,
+      required String firstName,
+      String? middleName,
+      required String phone})
+      : this._(
+            id: id,
+            lastName: lastName,
+            firstName: firstName,
+            middleName: middleName,
+            phone: phone);
 
   // ---- getters ----
   int? get id => _id;
@@ -38,7 +43,7 @@ class TeacherInfo {
   String get phone => _phone;
 
   // ---- публичные утилиты ----
-  static final RegExp nameRe  = RegExp(r"^[A-Za-zА-Яа-яЁё\-'\s]{1,100}$");
+  static final RegExp nameRe = RegExp(r"^[A-Za-zА-Яа-яЁё\-'\s]{1,100}$");
   static final RegExp phoneRe = RegExp(r'^\+?[0-9]{10,15}$');
 
   Map<String, dynamic> toJson() {
@@ -58,8 +63,9 @@ class TeacherInfo {
     return t.isEmpty ? null : t;
   }
 
-  static bool isValidName(String s)   => s.trim().isNotEmpty && nameRe.hasMatch(s.trim());
-  static bool isValidPhone(String s)  => phoneRe.hasMatch(s.trim());
+  static bool isValidName(String s) =>
+      s.trim().isNotEmpty && nameRe.hasMatch(s.trim());
+  static bool isValidPhone(String s) => phoneRe.hasMatch(s.trim());
 
   /// Проверяет условие [cond], если не выполняется, кидает [ArgumentError] с сообщением [message].
   static void require(bool cond, String message) {
@@ -67,15 +73,19 @@ class TeacherInfo {
   }
 
   /// Валидирует поле имени [value] с меткой [label]. Если [optional] и значение пустое, не валидирует.
-  static void validateNameField(String? value, String label, {bool optional = false}) {
+  static void validateNameField(String? value, String label,
+      {bool optional = false}) {
     if (optional && (value == null || value.isEmpty)) return;
-    require(value != null && isValidName(value), 'Некорректное значение поля $label');
+    require(value != null && isValidName(value),
+        'Некорректное значение поля $label');
   }
 
   // ---- краткий вывод ----
   String toShortString() {
     final f = _firstName.isNotEmpty ? '${_firstName[0]}.' : '';
-    final m = (_middleName != null && _middleName!.isNotEmpty) ? '${_middleName![0]}.' : '';
+    final m = (_middleName != null && _middleName!.isNotEmpty)
+        ? '${_middleName![0]}.'
+        : '';
     return '$_lastName $f$m, $_phone';
   }
 
@@ -92,7 +102,8 @@ class TeacherInfo {
   }
 
   @override
-  int get hashCode => Object.hash(_id, _lastName, _firstName, _middleName, _phone);
+  int get hashCode =>
+      Object.hash(_id, _lastName, _firstName, _middleName, _phone);
 
   // ---- фабричные конструкторы ----
   factory TeacherInfo.brief({
@@ -122,7 +133,7 @@ class TeacherInfo {
   }
 
   factory TeacherInfo.fromJson(Map<String, dynamic> json) {
-    T? _read<T>(List<String> keys, {T? defaultValue, bool required = false}) {
+    T? read<T>(List<String> keys, {T? defaultValue, bool required = false}) {
       for (final k in keys) {
         if (json.containsKey(k) && json[k] != null) {
           final v = json[k];
@@ -134,18 +145,28 @@ class TeacherInfo {
         }
       }
       if (required) {
-        throw FormatException('Отсутствует обязательное поле: ${keys.join("|")}');
+        throw FormatException(
+            'Отсутствует обязательное поле: ${keys.join("|")}');
       }
       return defaultValue;
     }
 
-    final int? id = _read<int>(['id', 'teacherId']);
-    final String lastName = _read<String>(['lastName', 'last_name'], required: true)!;
-    final String firstName = _read<String>(['firstName', 'first_name'], required: true)!;
-    final String? middleName = _read<String?>(['middleName', 'middle_name'], defaultValue: null);
-    final String phone = _read<String>(['phone', 'phoneNumber', 'phone_number'], required: true)!;
+    final int? id = read<int>(['id', 'teacherId']);
+    final String lastName =
+        read<String>(['lastName', 'last_name'], required: true)!;
+    final String firstName =
+        read<String>(['firstName', 'first_name'], required: true)!;
+    final String? middleName =
+        read<String?>(['middleName', 'middle_name'], defaultValue: null);
+    final String phone = read<String>(['phone', 'phoneNumber', 'phone_number'],
+        required: true)!;
 
-    return TeacherInfo._(id: id, lastName: lastName, firstName: firstName, middleName: middleName, phone: phone);
+    return TeacherInfo._(
+        id: id,
+        lastName: lastName,
+        firstName: firstName,
+        middleName: middleName,
+        phone: phone);
   }
 
   @override

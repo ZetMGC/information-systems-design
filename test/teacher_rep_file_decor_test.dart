@@ -1,8 +1,7 @@
-import 'package:test/test.dart';
-
 import 'package:information_systems_design/domain/teacher.dart';
 import 'package:information_systems_design/domain/teacher_rep_base.dart';
 import 'package:information_systems_design/infrastructure/file/teacher_rep_file_decor.dart';
+import 'package:test/test.dart';
 
 class _FakeTeacherRepo extends TeacherRepBase {
   List<Teacher> _items;
@@ -43,10 +42,34 @@ void main() {
 
     setUp(() {
       base = _FakeTeacherRepo([
-        _t(id: 1, last: 'Ivanov', first: 'Sergey', middle: 'Petrovich', phone: '+100', exp: 2),
-        _t(id: 2, last: 'Sidorov', first: 'Alex', middle: 'Ivanovich', phone: '+101', exp: 7),
-        _t(id: 3, last: 'Petrov', first: 'Boris', middle: 'Alekseevich', phone: '+102', exp: 5),
-        _t(id: 4, last: 'Orlov', first: 'Anton', middle: null, phone: '+103', exp: 10),
+        _t(
+            id: 1,
+            last: 'Ivanov',
+            first: 'Sergey',
+            middle: 'Petrovich',
+            phone: '+100',
+            exp: 2),
+        _t(
+            id: 2,
+            last: 'Sidorov',
+            first: 'Alex',
+            middle: 'Ivanovich',
+            phone: '+101',
+            exp: 7),
+        _t(
+            id: 3,
+            last: 'Petrov',
+            first: 'Boris',
+            middle: 'Alekseevich',
+            phone: '+102',
+            exp: 5),
+        _t(
+            id: 4,
+            last: 'Orlov',
+            first: 'Anton',
+            middle: null,
+            phone: '+103',
+            exp: 10),
       ]);
     });
 

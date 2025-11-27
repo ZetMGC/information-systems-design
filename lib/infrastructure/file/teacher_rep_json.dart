@@ -9,7 +9,7 @@ class TeacherRepJson extends TeacherRepBase {
   final String path;
   TeacherRepJson(this.path);
 
-  @override 
+  @override
   Future<List<Teacher>> readAll() async {
     final file = File(path);
     if (!await file.exists()) return <Teacher>[];
@@ -22,7 +22,7 @@ class TeacherRepJson extends TeacherRepBase {
       throw const FormatException('JSON root must be a List!');
     }
 
-    final list = (raw as List).asMap().entries.map((entry) {
+    final list = (raw).asMap().entries.map((entry) {
       final i = entry.key;
       final e = entry.value;
       try {
@@ -42,4 +42,3 @@ class TeacherRepJson extends TeacherRepBase {
     await File(path).writeAsString(jsonText, flush: true);
   }
 }
-
