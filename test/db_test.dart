@@ -16,7 +16,7 @@ void main() {
   final port = int.parse(Platform.environment['PGPORT'] ?? '5432');
   final dbName = Platform.environment['PGDATABASE'] ?? 'postgres';
   final user = Platform.environment['PGUSER'] ?? 'postgres';
-  final pass = Platform.environment['PGPASSWORD'] ?? 'postgres';
+  final pass = Platform.environment['PGPASSWORD'] ?? 'secret'; 
 
   setUpAll(() async {
     appDb = AppDb.I;
@@ -74,6 +74,22 @@ void main() {
     final v = rows.first.first;
     return (v is int) ? v : int.parse(v.toString());
   }
+
+  test('AppDb is a singleton and reuses the same connection', () async {
+    expect(identical(AppDb.I, AppDb.I), isTrue);
+
+    final conn1 = appDb.conn;
+    await appDb.open(
+      host: host,
+      port: port,
+      database: dbName,
+      user: user,
+      password: pass,
+    );
+    final conn2 = appDb.conn;
+
+    expect(identical(conn1, conn2), isTrue);
+  });
 
   group('TeacherRepDB', () {
     test('(a) getById: returns Teacher or null; invalid id throws', () async {

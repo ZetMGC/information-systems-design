@@ -28,15 +28,12 @@ void main() {
       await f.writeAsString(yaml, flush: true);
     }
 
-    /// YAML с корнем-списком (— элементы)
     Future<void> writeYamlList(List<Map<String, dynamic>> rows) =>
         writeYaml(json2yaml(<String, dynamic>{'teachers': rows},
             yamlStyle: YamlStyle.pubspecYaml));
 
-    /// YAML с корнем-объектом: {teachers: [...]}
     Future<void> writeYamlTeachers(List<Map<String, dynamic>> rows) async {
-      final yaml = json2yaml(
-          <String, dynamic>{'teachers': rows}); // rows == [] → "teachers: []"
+      final yaml = json2yaml(<String, dynamic>{'teachers': rows});
       await File(path).parent.create(recursive: true);
       await File(path).writeAsString(yaml, flush: true);
     }
@@ -46,21 +43,21 @@ void main() {
       String ln,
       String fn, {
       String? mn,
-      String phone = '+79990000000',
+      String? phone,
       int exp = 1,
     }) {
+      final ph = phone ?? '+799900${id.toString().padLeft(5, '0')}';
       return {
         'id': id,
         'last_name': ln,
         'first_name': fn,
         if (mn != null) 'middle_name': mn,
-        'phone': phone,
+        'phone': ph,
         'experience_years': exp,
       };
     }
 
     test('(a) readAll: no file -> [], empty file -> []', () async {
-      // файла нет
       final all = await repo.readAll();
       expect(all, isEmpty);
 
@@ -77,17 +74,17 @@ void main() {
 
     test('(a/b) readAll <-> writeAll round-trip (root=list)', () async {
       final rows = [
-        row(1, 'Петров', 'Пётр',
-            mn: 'Сергеевич', phone: '+79990001122', exp: 7),
+        row(1, 'Ivanov', 'Ivan',
+            mn: 'Ivanovich', phone: '+79990001122', exp: 7),
       ];
       await writeYamlList(rows);
 
       final list = await repo.readAll();
       expect(list.length, 1);
       expect(list.first.id, 1);
-      expect(list.first.lastName, 'Петров');
-      expect(list.first.firstName, 'Пётр');
-      expect(list.first.middleName, 'Сергеевич');
+      expect(list.first.lastName, 'Ivanov');
+      expect(list.first.firstName, 'Ivan');
+      expect(list.first.middleName, 'Ivanovich');
       expect(list.first.phone, '+79990001122');
       expect(list.first.experienceYears, 7);
 
@@ -99,8 +96,8 @@ void main() {
 
     test('(a) readAll: supports root={teachers:[...]}', () async {
       final rows = [
-        row(2, 'Иванов', 'Иван', phone: '+79990000001', exp: 3),
-        row(3, 'Альтов', 'Антон', phone: '+79990000002', exp: 2),
+        row(2, 'Alpha', 'A', phone: '+79990000001', exp: 3),
+        row(3, 'Beta', 'B', phone: '+79990000002', exp: 2),
       ];
       await writeYamlTeachers(rows);
 
@@ -113,15 +110,15 @@ void main() {
         () async {
       final m1 = {
         'id': 10,
-        'last_name': 'А',
-        'first_name': 'а',
+        'last_name': 'Alpha',
+        'first_name': 'A',
         'phone': '+79990000003',
         'experience_years': 3,
       };
 
       final jsonString =
-          '{"id":11,"last_name":"B","first_name":"b","phone":"+79990000004","experience_years":2}';
-      final csv = 'Ivanov;Ivan;;+79990000005;5';
+          '{"id":11,"last_name":"Beta","first_name":"b","phone":"+79990000004","experience_years":2}';
+      final csv = 'Smith;John;;+79990000005;5';
 
       await writeYaml(json2yaml(<String, dynamic>{
         'teachers': [m1, jsonString, csv]
@@ -137,12 +134,12 @@ void main() {
       expect(list[1].firstName, 'b');
 
       expect(list[2].id, isNull);
-      expect(list[2].lastName, 'Ivanov');
+      expect(list[2].lastName, 'Smith');
       expect(list[2].experienceYears, 5);
     });
 
     test('(c) getById', () async {
-      await writeYamlList([row(1, 'A', 'a'), row(2, 'B', 'b')]);
+      await writeYamlList([row(1, 'A', 'a'), row(2, 'B', 'b', phone: '+79990000002')]);
 
       expect(await repo.getById(2), isNotNull);
       expect((await repo.getById(2))!.lastName, 'B');
@@ -153,19 +150,19 @@ void main() {
 
     test('(d) getKthNShortList: pagination + sort by lastName ASC', () async {
       await writeYamlList([
-        row(3, 'Иванов', 'Иван', mn: 'Иваныч'),
-        row(1, 'Петров', 'Пётр'),
-        row(2, 'Альтов', 'Антон'),
+        row(3, 'Bravo', 'Alice', mn: 'M'),
+        row(1, 'Alpha', 'Zed', phone: '+79990000001'),
+        row(2, 'Charlie', 'Bob', phone: '+79990000002'),
       ]);
       final p1 = await repo.getKthNShortList(k: 2, n: 1);
       expect(p1.length, 2);
-      expect(p1[0].lastName, 'Альтов');
-      expect(p1[1].lastName, 'Иванов');
-      expect(p1[1].middleName, 'Иваныч');
+      expect(p1[0].lastName, 'Alpha');
+      expect(p1[1].lastName, 'Bravo');
+      expect(p1[1].middleName, 'M');
 
       final p2 = await repo.getKthNShortList(k: 2, n: 2);
       expect(p2.length, 1);
-      expect(p2[0].lastName, 'Петров');
+      expect(p2[0].lastName, 'Charlie');
 
       final p3 = await repo.getKthNShortList(k: 2, n: 3);
       expect(p3, isEmpty);
@@ -177,24 +174,23 @@ void main() {
     test('(e) sortByLastName: returns sorted copy; persist=true writes YAML',
         () async {
       await writeYamlList([
-        row(3, 'Иванов', 'Иван'),
-        row(1, 'Петров', 'Пётр'),
-        row(2, 'Альтов', 'Антон'),
+        row(3, 'Zulu', 'Amy'),
+        row(1, 'Alpha', 'Ann', phone: '+79990000001'),
+        row(2, 'Mike', 'Bob', phone: '+79990000002'),
       ]);
 
       final sorted = await repo.sortByLastName();
       expect(sorted.map((e) => e.lastName).toList(),
-          ['Альтов', 'Иванов', 'Петров']);
+          ['Alpha', 'Mike', 'Zulu']);
 
-      // зафиксируем порядок в файле
       await repo.sortByLastName(persist: true);
       final after = await repo.readAll();
       expect(after.map((e) => e.lastName).toList(),
-          ['Альтов', 'Иванов', 'Петров']);
+          ['Alpha', 'Mike', 'Zulu']);
     });
 
     test('(f) add: assigns new id and saves YAML', () async {
-      await writeYamlList([row(2, 'B', 'b'), row(5, 'E', 'e')]);
+      await writeYamlList([row(2, 'B', 'b'), row(5, 'E', 'e', phone: '+79990000005')]);
 
       final created = await repo.add(Teacher.create(
         lastName: 'A',
@@ -258,7 +254,10 @@ void main() {
     });
 
     test('(h) deleteById: true when deleted; false when absent', () async {
-      await writeYamlList([row(1, 'A', 'a'), row(2, 'B', 'b')]);
+      await writeYamlList([
+        row(1, 'A', 'a'),
+        row(2, 'B', 'b', phone: '+79990000002'),
+      ]);
 
       final ok = await repo.deleteById(1);
       expect(ok, isTrue);
@@ -275,12 +274,10 @@ void main() {
 
     test('(i) getCount', () async {
       await writeYamlTeachers(
-          [row(1, 'A', 'a'), row(2, 'B', 'b'), row(3, 'C', 'c')]);
+          [row(1, 'A', 'a'), row(2, 'B', 'b', phone: '+79990000002'), row(3, 'C', 'c', phone: '+79990000003')]);
       expect(await repo.getCount(), 3);
 
       await writeYamlTeachers([]);
-      expect(await repo.getCount(), 0);
-
       expect(await repo.getCount(), 0);
 
       await writeYamlList([]);

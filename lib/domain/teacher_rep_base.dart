@@ -20,6 +20,18 @@ abstract class TeacherRepBase {
     return null;
   }
 
+  /// Обеспечивает уникальность номеров телефонов.
+  void ensureUniquePhones(Iterable<Teacher> items) {
+    final seen = <String>{};
+    for (final t in items) {
+      final phone = t.phone.trim();
+      if (seen.contains(phone)) {
+        throw StateError('Duplicate phone detected: $phone');
+      }
+      seen.add(phone);
+    }
+  }
+
   int _compareByLastName(Teacher a, Teacher b) {
     int cmp(String x, String y) =>
         x.toLowerCase().trim().compareTo(y.toLowerCase().trim());
@@ -85,6 +97,10 @@ abstract class TeacherRepBase {
     }
 
     final list = await readAll();
+    final phoneKey = item.phone.trim();
+    if (list.any((t) => t.phone.trim() == phoneKey)) {
+      throw StateError('Teacher with phone $phoneKey already exists');
+    }
 
     int maxId = 0;
     for (final t in list) {
@@ -102,6 +118,7 @@ abstract class TeacherRepBase {
         experienceYears: item.experienceYears);
 
     list.add(newItem);
+    ensureUniquePhones(list);
     await writeAll(list);
 
     return newItem;
@@ -116,6 +133,12 @@ abstract class TeacherRepBase {
     final idx = list.indexWhere((t) => t.id == id);
     if (idx < 0) return false;
 
+    final phoneKey = item.phone.trim();
+    final duplicate = list.any((t) => t.id != id && t.phone.trim() == phoneKey);
+    if (duplicate) {
+      throw StateError('Teacher with phone $phoneKey already exists');
+    }
+
     final updated = Teacher.withId(
         id: id,
         lastName: item.lastName,
@@ -125,6 +148,7 @@ abstract class TeacherRepBase {
         experienceYears: item.experienceYears);
 
     list[idx] = updated;
+    ensureUniquePhones(list);
     await writeAll(list);
     return true;
   }

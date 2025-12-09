@@ -68,6 +68,7 @@ class TeacherRepYaml extends TeacherRepBase {
 
   @override
   Future<void> writeAll(List<Teacher> items) async {
+    ensureUniquePhones(items);
     final data = items.map((e) => e.toJson()).toList();
     final yamlText = json2yaml(
       <String, dynamic>{'teachers': data},

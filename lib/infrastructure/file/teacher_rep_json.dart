@@ -37,6 +37,7 @@ class TeacherRepJson extends TeacherRepBase {
 
   @override
   Future<void> writeAll(List<Teacher> items) async {
+    ensureUniquePhones(items);
     final jsonText = jsonEncode(items.map((t) => t.toJson()).toList());
     await File(path).parent.create(recursive: true);
     await File(path).writeAsString(jsonText, flush: true);

@@ -106,14 +106,14 @@ classDiagram
     +String path
     +readAll()
     +writeAll(...)
-    +... (остальные из Base)
+    +... (Base)
   }
 
   class TeacherRepYaml {
     +String path
     +readAll()
     +writeAll(...)
-    +... (остальные из Base)
+    +... (Base)
   }
 
   TeacherRepBase <|-- TeacherRepJson
@@ -130,8 +130,8 @@ classDiagram
   class DbClient {
     <<interface>>
     +execute(sql,params) Future~int~
-    +query(sql,params) Future~List<List<dynamic>>~
-    +mappedQuery(sql,params) Future~List<Map<String,Map<String,dynamic>>>~
+    +query(sql,params) Future~List~List~dynamic~~~
+    +mappedQuery(sql,params) Future~List ~Map~String, Map ~String,dynamic~~~~
     +transaction~R~(action: Future~R~(DbTx)) Future~R~
     +scalarInt(sql,params) Future~int~
   }
@@ -150,7 +150,7 @@ classDiagram
   }
 
   %% ===== DB REPO =====
-  class TeacherRepDB {
+  class TeacherRepDb {
     +DbClient db
     +getById(...)
     +getKthNShortList(...)
@@ -160,9 +160,29 @@ classDiagram
     +getCount()
   }
 
-  TeacherRepBase <|-- TeacherRepDB
-  TeacherRepDB ..> DbClient : depends on
-  PgDbClientAdapter ..|> DbClient
-  PgDbClientAdapter ..> AppDb : delegates
-```
+  %% ===== DECORATORS =====
+  class TeacherRepFileDecor {
+    <<decorator>>
+    +TeacherRepBase inner
+    +getKthNShortList(...)
+    +getCount()
+  }
 
+  class TeacherRepDbDecor {
+    <<decorator>>
+    +TeacherRepBase inner
+    +DbClient db
+    +QueryFilter filter
+    +QuerySort? sort
+    +getKthNShortList(...)
+    +getCount()
+  }
+
+  TeacherRepBase <|-- TeacherRepDb
+  TeacherRepDb ..> DbClient 
+  PgDbClientAdapter ..|> DbClient
+  PgDbClientAdapter ..> AppDb
+  TeacherRepBase <|-- TeacherRepFileDecor
+  TeacherRepBase <|-- TeacherRepDbDecor
+  TeacherRepDbDecor ..> DbClient
+```

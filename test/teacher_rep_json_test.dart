@@ -22,28 +22,27 @@ void main() {
       }
     });
 
-    /// Утилита: перезаписывает файл «сырым» JSON (корень — массив).
     Future<void> writeRaw(List<dynamic> rows) async {
       final f = File(path);
       await f.parent.create(recursive: true);
       await f.writeAsString(jsonEncode(rows), flush: true);
     }
 
-    /// Фикстура: «полный» объект Teacher в Map-формате (как after toJson()).
     Map<String, dynamic> t(
       int id,
       String ln,
       String fn, {
       String? mn,
-      String phone = '+79990000000',
+      String? phone,
       int exp = 1,
     }) {
+      final ph = phone ?? '+799900${id.toString().padLeft(5, '0')}';
       return {
         'id': id,
         'last_name': ln,
         'first_name': fn,
         if (mn != null) 'middle_name': mn,
-        'phone': phone,
+        'phone': ph,
         'experience_years': exp,
       };
     }
@@ -66,16 +65,16 @@ void main() {
 
     test('(a/b) readAll <-> writeAll round-trip', () async {
       final rows = [
-        t(1, 'Петров', 'Пётр', mn: 'Сергеевич', phone: '+79990001122', exp: 7)
+        t(1, 'Ivanov', 'Ivan', mn: 'Ivanovich', phone: '+79990001122', exp: 7)
       ];
       await writeRaw(rows);
 
       final list = await repo.readAll();
       expect(list.length, 1);
       expect(list.first.id, 1);
-      expect(list.first.lastName, 'Петров');
-      expect(list.first.firstName, 'Пётр');
-      expect(list.first.middleName, 'Сергеевич');
+      expect(list.first.lastName, 'Ivanov');
+      expect(list.first.firstName, 'Ivan');
+      expect(list.first.middleName, 'Ivanovich');
       expect(list.first.phone, '+79990001122');
       expect(list.first.experienceYears, 7);
 
@@ -88,21 +87,21 @@ void main() {
     test('(a) readAll: uses Teacher.from for mixed item formats', () async {
       final mapWithStrings = {
         'id': '10',
-        'last_name': 'A',
-        'first_name': 'a',
+        'last_name': 'Alpha',
+        'first_name': 'A',
         'phone': '+79933295462',
         'experience_years': '3',
       };
 
       final jsonStringItem = jsonEncode({
         'id': 11,
-        'last_name': 'B',
-        'first_name': 'b',
-        'phone': '+79933295462',
+        'last_name': 'Beta',
+        'first_name': 'B',
+        'phone': '+79933295463',
         'experience_years': 2,
       });
 
-      final csvString = 'Ivanov;Ivan;;+79990000003;5';
+      final csvString = 'Smith;John;;+79990000003;5';
 
       await writeRaw([mapWithStrings, jsonStringItem, csvString]);
 
@@ -110,26 +109,29 @@ void main() {
       expect(list.length, 3);
 
       expect(list[0].id, 10);
-      expect(list[0].lastName, 'A');
-      expect(list[0].firstName, 'a');
+      expect(list[0].lastName, 'Alpha');
+      expect(list[0].firstName, 'A');
       expect(list[0].experienceYears, 3);
 
       expect(list[1].id, 11);
-      expect(list[1].lastName, 'B');
-      expect(list[1].firstName, 'b');
+      expect(list[1].lastName, 'Beta');
+      expect(list[1].firstName, 'B');
       expect(list[1].experienceYears, 2);
 
       expect(list[2].id, isNull);
-      expect(list[2].lastName, 'Ivanov');
-      expect(list[2].firstName, 'Ivan');
+      expect(list[2].lastName, 'Smith');
+      expect(list[2].firstName, 'John');
       expect(list[2].experienceYears, 5);
     });
 
     test('(c) getById: found / not found / bad id', () async {
-      await writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b')]);
+      await writeRaw([
+        t(1, 'Alpha', 'A'),
+        t(2, 'Beta', 'B', phone: '+79990000002'),
+      ]);
 
       expect(await repo.getById(2), isNotNull);
-      expect((await repo.getById(2))!.lastName, 'B');
+      expect((await repo.getById(2))!.lastName, 'Beta');
 
       expect(await repo.getById(3), isNull);
 
@@ -139,19 +141,19 @@ void main() {
 
     test('(d) getKthNShortList: pagination + sort by lastName (ASC)', () async {
       await writeRaw([
-        t(3, 'Иванов', 'Иван', mn: 'Иваныч'),
-        t(1, 'Петров', 'Пётр'),
-        t(2, 'Альтов', 'Антон'),
+        t(3, 'Bravo', 'Alice', mn: 'Middle'),
+        t(1, 'Alpha', 'Zed', phone: '+79990000001'),
+        t(2, 'Charlie', 'Bob', phone: '+79990000002'),
       ]);
       final p1 = await repo.getKthNShortList(k: 2, n: 1);
       expect(p1.length, 2);
-      expect(p1[0].lastName, 'Альтов');
-      expect(p1[1].lastName, 'Иванов');
-      expect(p1[1].middleName, 'Иваныч');
+      expect(p1[0].lastName, 'Alpha');
+      expect(p1[1].lastName, 'Bravo');
+      expect(p1[1].middleName, 'Middle');
 
       final p2 = await repo.getKthNShortList(k: 2, n: 2);
       expect(p2.length, 1);
-      expect(p2[0].lastName, 'Петров');
+      expect(p2[0].lastName, 'Charlie');
 
       final p3 = await repo.getKthNShortList(k: 2, n: 3);
       expect(p3, isEmpty);
@@ -163,27 +165,26 @@ void main() {
     test('(e) sortByLastName: returns sorted copy; persist=true writes file',
         () async {
       await writeRaw([
-        t(3, 'Иванов', 'Иван'),
-        t(1, 'Петров', 'Пётр'),
-        t(2, 'Альтов', 'Антон'),
+        t(3, 'Zulu', 'Amy'),
+        t(1, 'Alpha', 'Ann', phone: '+79990000001'),
+        t(2, 'Mike', 'Bob', phone: '+79990000002'),
       ]);
 
       final sorted = await repo.sortByLastName();
       expect(sorted.map((e) => e.lastName).toList(),
-          ['Альтов', 'Иванов', 'Петров']);
+          ['Alpha', 'Mike', 'Zulu']);
 
       final beforePersist = await repo.readAll();
       await repo.sortByLastName(persist: true);
       final afterPersist = await repo.readAll();
       expect(afterPersist.map((e) => e.lastName).toList(),
-          ['Альтов', 'Иванов', 'Петров']);
+          ['Alpha', 'Mike', 'Zulu']);
 
       expect(afterPersist.length, beforePersist.length);
     });
 
     test('(f) add: assigns new id and saves', () async {
-      // maxId = 5
-      await writeRaw([t(2, 'B', 'b'), t(5, 'E', 'e')]);
+      await writeRaw([t(2, 'B', 'b'), t(5, 'E', 'e', phone: '+79990000005')]);
 
       final created = await repo.add(Teacher.create(
         lastName: 'A',
@@ -247,7 +248,10 @@ void main() {
     });
 
     test('(h) deleteById: true when deleted; false when absent', () async {
-      await writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b')]);
+      await writeRaw([
+        t(1, 'A', 'a'),
+        t(2, 'B', 'b', phone: '+79990000002'),
+      ]);
 
       final ok = await repo.deleteById(1);
       expect(ok, isTrue);
@@ -264,7 +268,11 @@ void main() {
     });
 
     test('(i) getCount', () async {
-      await writeRaw([t(1, 'A', 'a'), t(2, 'B', 'b'), t(3, 'C', 'c')]);
+      await writeRaw([
+        t(1, 'A', 'a'),
+        t(2, 'B', 'b', phone: '+79990000002'),
+        t(3, 'C', 'c', phone: '+79990000003')
+      ]);
       expect(await repo.getCount(), 3);
 
       await writeRaw([]);
