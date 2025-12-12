@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "last_name": "Ivanov",
+    "first_name": "Petr",
+    "middle_name": "Sergeevich",
+    "phone": "+79000000101",
+    "experience_years": 12
+  },
+  {
+    "id": 2,
+    "last_name": "Smirnova",
+    "first_name": "Elena",
+    "middle_name": "Andreevna",
+    "phone": "+79000000102",
+    "experience_years": 8
+  },
+  {
+    "id": 3,
+    "last_name": "Petrov",
+    "first_name": "Alexey",
+    "middle_name": null,
+    "phone": "+79000000103",
+    "experience_years": 15
+  },
+  {
+    "id": 4,
+    "last_name": "Sidorov",
+    "first_name": "Dmitry",
+    "middle_name": "Igorevich",
+    "phone": "+79000000104",
+    "experience_years": 5
+  },
+  {
+    "id": 5,
+    "last_name": "Kuznetsova",
+    "first_name": "Maria",
+    "middle_name": "Vladimirovna",
+    "phone": "+79000000105",
+    "experience_years": 20
+  }
+]
