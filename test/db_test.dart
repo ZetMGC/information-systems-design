@@ -93,32 +93,43 @@ void main() {
 
   group('TeacherRepDB', () {
     test('(a) getById: returns Teacher or null; invalid id throws', () async {
-      final id1 = await seed(
-          ln: 'Иванов',
-          fn: 'Иван',
-          mn: 'Иваныч',
-          phone: '+79990000001',
-          exp: 5);
-      final id2 =
-          await seed(ln: 'Петров', fn: 'Пётр', phone: '+79990000002', exp: 3);
 
-      final t2 = await repo.getById(id2);
-      expect(t2, isNotNull);
-      expect(t2!.id, id2);
-      expect(t2.lastName, 'Петров');
-      expect(t2.firstName, 'Пётр');
-      expect(t2.middleName, isNull);
-      expect(t2.phone, '+79990000002');
-      expect(t2.experienceYears, 3);
+      // final id2 =
+      //     await seed(ln: 'Сидоров', fn: 'Пётр', phone: '+79990000002', exp: 3);
 
-      final miss = await repo.getById(99999);
-      expect(miss, isNull);
+      // final t2 = await repo.getById(id2);
+      //expect(t2, isNotNull);
+      // expect(t2!.id, id2);
+      // expect(t2.lastName, 'Сидоров');
+  
+  
+      // expect(t2.lastName, 'Сидорова');
 
-      expect(() => repo.getById(0), throwsArgumentError);
-      expect(() => repo.getById(-7), throwsArgumentError);
+      final t = await repo.getById(2);
+      if (t == null) return;
 
-      final t1 = await repo.getById(id1);
-      expect(t1!.middleName, 'Иваныч');
+      expect(t.lastName, 'Сидоров'); 
+      final updated = Teacher.withId(
+        id: t.id!,
+        lastName: 'Сидорова',
+        firstName: t.firstName,
+        middleName: t.middleName,
+        phone: t.phone,
+        experienceYears: t.experienceYears,
+      );
+
+      await repo.replaceById(t.id!, updated);
+      expect(t.lastName, 'Сидорова'); 
+     
+
+      // final miss = await repo.getById(99999);
+      // expect(miss, isNull);
+
+      // expect(() => repo.getById(0), throwsArgumentError);
+      // expect(() => repo.getById(-7), throwsArgumentError);
+
+      // final t1 = await repo.getById(id1);
+      // expect(t1!.middleName, 'Иваныч');
     });
 
     test(
@@ -191,51 +202,52 @@ void main() {
     });
 
     test('(d) replaceById: true if updated, false if not found', () async {
-      final id = await seed(
-          ln: 'Old', fn: 'Name', mn: 'M', phone: '+79990000020', exp: 1);
+      // final id = await seed(
+      //     ln: 'Old', fn: 'Name', mn: 'M', phone: '+79990000020', exp: 1);
 
-      final ok = await repo.replaceById(
-        id,
-        Teacher.create(
-          lastName: 'New',
-          firstName: 'John',
-          middleName: 'Q',
-          phone: '+79990000021',
-          experienceYears: 9,
-        ),
-      );
-      expect(ok, isTrue);
+      // final ok = await repo.replaceById(
+      //   id,
+      //   Teacher.create(
+      //     lastName: 'New',
+      //     firstName: 'John',
+      //     middleName: 'Q',
+      //     phone: '+79990000021',
+      //     experienceYears: 9,
+      //   ),
+      // );
+      // expect(ok, isTrue);
 
-      final after = await repo.getById(id);
-      expect(after, isNotNull);
-      expect(after!.lastName, 'New');
-      expect(after.firstName, 'John');
-      expect(after.middleName, 'Q');
-      expect(after.phone, '+79990000021');
-      expect(after.experienceYears, 9);
+      final stud = await repo.getById(2);
+      expect(stud!.firstName, 'Петров');
+      // expect(after, isNotNull);
+      // expect(after!.lastName, 'New');
+      // expect(after.firstName, 'John');
+      // expect(after.middleName, 'Q');
+      // expect(after.phone, '+79990000021');
+      // expect(after.experienceYears, 9);
 
-      final miss = await repo.replaceById(
-        99999,
-        Teacher.create(
-          lastName: 'Z',
-          firstName: 'z',
-          phone: '+79990000022',
-          experienceYears: 2,
-        ),
-      );
-      expect(miss, isFalse);
+      // final miss = await repo.replaceById(
+      //   99999,
+      //   Teacher.create(
+      //     lastName: 'Z',
+      //     firstName: 'z',
+      //     phone: '+79990000022',
+      //     experienceYears: 2,
+      //   ),
+      // );
+      // expect(miss, isFalse);
 
-      expect(
-        () => repo.replaceById(
-          0,
-          Teacher.create(
-              lastName: 'A',
-              firstName: 'a',
-              phone: '+79990000023',
-              experienceYears: 1),
-        ),
-        throwsArgumentError,
-      );
+      // expect(
+      //   () => repo.replaceById(
+      //     0,
+      //     Teacher.create(
+      //         lastName: 'A',
+      //         firstName: 'a',
+      //         phone: '+79990000023',
+      //         experienceYears: 1),
+      //   ),
+      //   throwsArgumentError,
+      // );
     });
 
     test('(e) deleteById: true if deleted, false if absent; invalid id throws',

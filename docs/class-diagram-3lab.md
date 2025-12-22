@@ -124,6 +124,30 @@ classDiagram
   TeacherRepBase <|-- TeacherRepDbDecor
   TeacherRepDbDecor ..> DbClient
 
+  class QueryFilter {
+    +String where
+    +Map params
+    +none
+  }
+
+  class QuerySort {
+    +SortField field
+    +bool asc
+    +toOrderBySql()
+  }
+
+  class SortField {
+    <<enum>>
+    lastName
+    firstName
+    id
+    experienceYears
+  }
+
+  TeacherRepDbDecor ..> QueryFilter
+  TeacherRepDbDecor ..> QuerySort
+  QuerySort ..> SortField
+
   %% ===== OBSERVER DECORATOR =====
   class TeacherObserver {
     <<interface>>
@@ -153,13 +177,39 @@ classDiagram
     +onChanged(List~Teacher~)
   }
 
+  class AddTeacherController {
+    +handle(HttpRequest)
+    +_writeHtml(HttpResponse,String)
+  }
+
+  class EditTeacherController {
+    +handle(HttpRequest,int)
+    +_writeHtml(HttpResponse,String)
+  }
+
   class MainPageView {
     +renderMainPage(List~TeacherInfo~)
     +renderDetails(Teacher)
   }
 
+  class AddTeacherView {
+    +renderForm(values,error)
+    +renderSuccess(Teacher)
+  }
+
+  class EditTeacherView {
+    +renderForm(id,values,error)
+    +renderSuccess(Teacher)
+  }
+
   MainPageController ..> ObservableTeacherRepo
   MainPageController ..> MainPageView
+  AddTeacherController ..> ObservableTeacherRepo
+  AddTeacherController ..> AddTeacherView
+  EditTeacherController ..> ObservableTeacherRepo
+  EditTeacherController ..> EditTeacherView
   MainPageView ..> TeacherInfo
   MainPageView ..> Teacher
+  AddTeacherView ..> Teacher
+  EditTeacherView ..> Teacher
 ```

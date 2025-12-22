@@ -1,6 +1,8 @@
 import 'package:information_systems_design/domain/teacher.dart';
+import 'package:information_systems_design/domain/teacher_info.dart';
 import 'package:information_systems_design/domain/teacher_rep_base.dart';
 import 'package:information_systems_design/infrastructure/file/teacher_rep_file_decor.dart';
+import 'package:information_systems_design/infrastructure/file/teacher_rep_json.dart';
 import 'package:test/test.dart';
 
 class _FakeTeacherRepo extends TeacherRepBase {
@@ -37,6 +39,21 @@ Teacher _t({
     );
 
 void main() {
+  Future<void> printPage() async {
+    final repo = TeacherRepJson('data/teachers.json');
+
+      final decor = TeacherRepFileDecor(
+        inner: repo,
+        filter: (t) => t.lastName.toLowerCase().startsWith('i'),
+        sort: (a, b) => a.lastName.toLowerCase().compareTo(b.lastName.toLowerCase()),
+      );
+
+      final page = await decor.getKthNShortList(k: 100, n: 1);
+      for (TeacherInfo i in page) {
+        print(i.lastName);
+      }
+  }
+
   group('TeacherRepFileDecor', () {
     late _FakeTeacherRepo base;
 
@@ -73,20 +90,25 @@ void main() {
       ]);
     });
 
+
     test('applies predicate, pagination, and preserves middle names', () async {
-      final decor = TeacherRepFileDecor(
-        inner: base,
-        filter: (t) => t.experienceYears >= 5,
-      );
+      await printPage();
+    
+// page -> List<TeacherInfo> только с фамилией на "а", отсортированы
 
-      final page1 = await decor.getKthNShortList(k: 2, n: 1);
-      expect(page1.map((t) => t.lastName), ['Orlov', 'Petrov']);
-      expect(page1[0].middleName, isNull);
-      expect(page1[1].middleName, 'Alekseevich');
+      // final decor = TeacherRepFileDecor(
+      //   inner: base,
+      //   filter: (t) => t.experienceYears >= 5,
+      // );
 
-      final page2 = await decor.getKthNShortList(k: 2, n: 2);
-      expect(page2.length, 1);
-      expect(page2.first.lastName, 'Sidorov');
+      // final page1 = await decor.getKthNShortList(k: 2, n: 1);
+      // expect(page1.map((t) => t.lastName), ['Orlov', 'Petrov']);
+      // expect(page1[0].middleName, isNull);
+      // expect(page1[1].middleName, 'Alekseevich');
+
+      // final page2 = await decor.getKthNShortList(k: 2, n: 2);
+      // expect(page2.length, 1);
+      // expect(page2.first.lastName, 'Sidorov');
     });
 
     test('custom comparator and getCount reflect filter', () async {

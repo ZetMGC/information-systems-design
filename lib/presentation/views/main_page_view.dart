@@ -18,6 +18,7 @@ class MainPageView {
         <title>Учителя</title>
       </head>
       <body>
+        <p><a href="/teachers/new" target="_blank">Add teacher</a></p>
         <h1>Список преподавателей</h1>
         <table border="1">
           <tr>
@@ -49,6 +50,8 @@ class MainPageView {
           <tr><th>Телефон</th><td>${t.phone}</td></tr>
           <tr><th>Стаж</th><td>${t.experienceYears} лет</td></tr>
         </table>
+        <br><br>
+        <a href="/teachers/${t.id}/edit" target="_blank">Edit</a>
         <br><br>
         <a href="/">← Назад к списку</a>
       </body>
