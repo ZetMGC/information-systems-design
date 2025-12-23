@@ -6,7 +6,7 @@ sequenceDiagram
   participant Browser
   participant MainPageController
   participant AddTeacherController
-  participant AddTeacherView
+  participant TeacherFormView
   participant Repo as ObservableTeacherRepo
   participant Store as TeacherRepJson
 
@@ -18,7 +18,7 @@ sequenceDiagram
 
   User->>Browser: Click "Add teacher"
   Browser->>AddTeacherController: GET /teachers/new (new tab)
-  AddTeacherController->>AddTeacherView: renderForm()
+  AddTeacherController->>TeacherFormView: renderForm()
   AddTeacherController-->>Browser: Form HTML
 
   User->>Browser: Submit form
@@ -27,7 +27,7 @@ sequenceDiagram
   AddTeacherController->>Repo: add(Teacher)
   Repo->>Store: writeAll(...)
   Repo-->>AddTeacherController: created Teacher
-  AddTeacherController->>AddTeacherView: renderSuccess(created)
+  AddTeacherController->>TeacherFormView: renderSuccess(created)
   AddTeacherController-->>Browser: Success HTML + JS reload opener
   Browser->>Browser: reload opener (main page)
 ```

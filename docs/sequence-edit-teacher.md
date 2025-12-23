@@ -6,7 +6,7 @@ sequenceDiagram
   participant Browser
   participant MainPageController
   participant EditTeacherController
-  participant EditTeacherView
+  participant TeacherFormView
   participant Repo as ObservableTeacherRepo
   participant Store as TeacherRepJson
 
@@ -20,7 +20,7 @@ sequenceDiagram
   Browser->>EditTeacherController: GET /teachers/{id}/edit (new tab)
   EditTeacherController->>Repo: getById(id)
   Repo-->>EditTeacherController: Teacher
-  EditTeacherController->>EditTeacherView: renderForm(values)
+  EditTeacherController->>TeacherFormView: renderForm(values)
   EditTeacherController-->>Browser: Form HTML
 
   User->>Browser: Submit form
@@ -29,7 +29,7 @@ sequenceDiagram
   EditTeacherController->>Repo: replaceById(id, Teacher)
   Repo->>Store: writeAll(...)
   Repo-->>EditTeacherController: ok
-  EditTeacherController->>EditTeacherView: renderSuccess(updated)
+  EditTeacherController->>TeacherFormView: renderSuccess(updated)
   EditTeacherController-->>Browser: Success HTML + JS reload opener
   Browser->>Browser: reload opener (main page)
 ```

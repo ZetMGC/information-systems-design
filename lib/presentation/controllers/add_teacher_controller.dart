@@ -3,18 +3,25 @@ import 'dart:io';
 
 import 'package:information_systems_design/domain/teacher.dart';
 import 'package:information_systems_design/infrastructure/observer/observable_teacher_repo.dart';
-import 'package:information_systems_design/presentation/views/add_teacher_view.dart';
+import 'package:information_systems_design/presentation/views/teacher_form_view.dart';
 
 class AddTeacherController {
   final ObservableTeacherRepo _repo;
-  final _view = AddTeacherView();
+  final _view = TeacherFormView();
 
   AddTeacherController(this._repo);
 
   Future<void> handle(HttpRequest req) async {
     try {
       if (req.method == 'GET') {
-        _writeHtml(req.response, _view.renderForm());
+        _writeHtml(
+          req.response,
+          _view.renderForm(
+            title: 'Add teacher',
+            action: '/teachers/new',
+            values: const <String, String>{},
+          ),
+        );
       } else if (req.method == 'POST') {
         final form = await _readForm(req);
         await _handlePost(req.response, form);
@@ -43,6 +50,8 @@ class AddTeacherController {
       _writeHtml(
         res,
         _view.renderForm(
+          title: 'Add teacher',
+          action: '/teachers/new',
           values: form,
           error: 'experience_years must be an integer',
         ),
@@ -58,11 +67,23 @@ class AddTeacherController {
         phone: phone,
         experienceYears: exp,
       ));
-      _writeHtml(res, _view.renderSuccess(created));
+      _writeHtml(
+        res,
+        _view.renderSuccess(
+          teacher: created,
+          backLink: '/',
+          backLabel: 'Back to list',
+        ),
+      );
     } catch (e) {
       _writeHtml(
         res,
-        _view.renderForm(values: form, error: _errorMessage(e)),
+        _view.renderForm(
+          title: 'Add teacher',
+          action: '/teachers/new',
+          values: form,
+          error: _errorMessage(e),
+        ),
       );
     }
   }

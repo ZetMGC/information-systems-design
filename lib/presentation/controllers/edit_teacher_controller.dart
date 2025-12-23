@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:information_systems_design/domain/teacher.dart';
 import 'package:information_systems_design/infrastructure/observer/observable_teacher_repo.dart';
-import 'package:information_systems_design/presentation/views/edit_teacher_view.dart';
+import 'package:information_systems_design/presentation/views/teacher_form_view.dart';
 
 class EditTeacherController {
   final ObservableTeacherRepo _repo;
-  final _view = EditTeacherView();
+  final _view = TeacherFormView();
 
   EditTeacherController(this._repo);
 
@@ -47,7 +47,14 @@ class EditTeacherController {
       'experience_years': teacher.experienceYears.toString(),
     };
 
-    _writeHtml(res, _view.renderForm(id: id, values: values));
+    _writeHtml(
+      res,
+      _view.renderForm(
+        title: 'Edit teacher #$id',
+        action: '/teachers/$id/edit',
+        values: values,
+      ),
+    );
   }
 
   Future<void> _handlePost(
@@ -63,7 +70,8 @@ class EditTeacherController {
       _writeHtml(
         res,
         _view.renderForm(
-          id: id,
+          title: 'Edit teacher #$id',
+          action: '/teachers/$id/edit',
           values: form,
           error: 'experience_years must be an integer',
         ),
@@ -87,11 +95,23 @@ class EditTeacherController {
         return;
       }
 
-      _writeHtml(res, _view.renderSuccess(updated));
+      _writeHtml(
+        res,
+        _view.renderSuccess(
+          teacher: updated,
+          backLink: '/teachers/$id',
+          backLabel: 'Open details',
+        ),
+      );
     } catch (e) {
       _writeHtml(
         res,
-        _view.renderForm(id: id, values: form, error: _errorMessage(e)),
+        _view.renderForm(
+          title: 'Edit teacher #$id',
+          action: '/teachers/$id/edit',
+          values: form,
+          error: _errorMessage(e),
+        ),
       );
     }
   }

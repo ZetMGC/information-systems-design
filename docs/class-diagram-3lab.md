@@ -187,29 +187,36 @@ classDiagram
     +_writeHtml(HttpResponse,String)
   }
 
+  class DeleteTeacherController {
+    +handle(HttpRequest,int)
+    +_writeHtml(HttpResponse,String)
+  }
+
   class MainPageView {
     +renderMainPage(List~TeacherInfo~)
     +renderDetails(Teacher)
   }
 
-  class AddTeacherView {
-    +renderForm(values,error)
-    +renderSuccess(Teacher)
+  class TeacherFormView {
+    +renderForm(title,action,values,error)
+    +renderSuccess(teacher,backLink,backLabel)
   }
 
-  class EditTeacherView {
-    +renderForm(id,values,error)
-    +renderSuccess(Teacher)
+  class DeleteTeacherView {
+    +renderConfirm(Teacher)
+    +renderSuccess(id)
   }
 
   MainPageController ..> ObservableTeacherRepo
   MainPageController ..> MainPageView
   AddTeacherController ..> ObservableTeacherRepo
-  AddTeacherController ..> AddTeacherView
+  AddTeacherController ..> TeacherFormView
   EditTeacherController ..> ObservableTeacherRepo
-  EditTeacherController ..> EditTeacherView
+  EditTeacherController ..> TeacherFormView
+  DeleteTeacherController ..> ObservableTeacherRepo
+  DeleteTeacherController ..> DeleteTeacherView
   MainPageView ..> TeacherInfo
   MainPageView ..> Teacher
-  AddTeacherView ..> Teacher
-  EditTeacherView ..> Teacher
+  TeacherFormView ..> Teacher
+  DeleteTeacherView ..> Teacher
 ```
